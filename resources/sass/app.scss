@@ -1,0 +1,60 @@
+// Import third-party CSS that we want bundled via Vite
+@import "bootstrap/scss/bootstrap";
+
+// Plugin styles
+@import "sweetalert2/dist/sweetalert2.min.css";
+@import "flatpickr/dist/flatpickr.min.css";
+@import "tom-select/dist/css/tom-select.bootstrap5.min.css";
+@import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+
+// Custom helpers
+.tom-select-bs5 .ts-control {
+    border-color: var(--bs-border-color);
+}
+
+.flatpickr-input.form-control[readonly] {
+    background-color: var(--bs-body-bg);
+}
+
+// Fixed Bootstrap 5 pagination tweaks (full rounded, centered, no jump)
+.pagination {
+    --bs-pagination-color: var(--bs-primary);
+    --bs-pagination-active-bg: var(--bs-primary);
+    --bs-pagination-active-border-color: var(--bs-primary);
+    --bs-pagination-focus-box-shadow: none;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.pagination .page-link {
+    border-radius: var(--bs-border-radius) !important;
+    min-width: 36px;
+    text-align: center;
+}
+
+.pagination .page-item.disabled .page-link {
+    opacity: 0.55;
+}
+
+// Server-side DataTable wrapper
+.dt-wrapper {
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        margin-bottom: 0.5rem;
+    }
+
+    table.dataTable thead th {
+        white-space: nowrap;
+    }
+}
+
+// Make the admin layout play nicely with Inertia / Vue
+[v-cloak] {
+    display: none !important;
+}
+
+main.page-content {
+    min-height: calc(100vh - 70px);
+}
