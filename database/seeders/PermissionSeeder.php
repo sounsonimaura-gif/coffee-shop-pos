@@ -59,8 +59,8 @@ class PermissionSeeder extends Seeder
         'orders' => ['view', 'create', 'update', 'delete', 'void'],
         'sale_invoices' => ['view', 'create', 'update', 'delete', 'void'],
         'payments' => ['view', 'create', 'update', 'delete'],
-        'online_orders' => ['view', 'update'],
-        'delivery_orders' => ['view', 'update'],
+        'online_orders' => ['view', 'create', 'update', 'delete'],
+        'delivery_orders' => ['view', 'create', 'update', 'delete'],
 
         'expense_categories' => ['view', 'create', 'update', 'delete'],
         'expenses' => ['view', 'create', 'update', 'delete'],

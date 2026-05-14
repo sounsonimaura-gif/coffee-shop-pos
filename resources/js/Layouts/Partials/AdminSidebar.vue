@@ -55,6 +55,27 @@ const menu = computed(() => [
             { label: t('stock_transfers'), route: 'admin.stock-transfers.index', visible: hasAny('stock_transfers.view') },
             { label: t('stock_adjustments'), route: 'admin.stock-adjustments.index', visible: hasAny('stock_adjustments.view') },
             { label: t('waste_records'), route: 'admin.waste-records.index', visible: hasAny('waste_records.view') },
+            { label: t('recipes'), route: 'admin.recipes.index', visible: hasAny('recipes.view') },
+        ],
+    },
+    {
+        label: t('hr'),
+        icon: 'bi-person-workspace',
+        visible: hasAny('staff.view', 'payrolls.view', 'commissions.view'),
+        children: [
+            { label: t('staff'), route: 'admin.staff.index', visible: hasAny('staff.view') },
+            { label: t('staff_schedules'), route: 'admin.staff-schedules.index', visible: hasAny('staff_schedules.view') },
+            { label: t('payrolls'), route: 'admin.payrolls.index', visible: hasAny('payrolls.view') },
+            { label: t('commissions'), route: 'admin.commissions.index', visible: hasAny('commissions.view') },
+        ],
+    },
+    {
+        label: t('online_orders_module'),
+        icon: 'bi-truck',
+        visible: hasAny('online_orders.view', 'delivery_orders.view'),
+        children: [
+            { label: t('online_orders'), route: 'admin.online-orders.index', visible: hasAny('online_orders.view') },
+            { label: t('delivery_orders'), route: 'admin.delivery-orders.index', visible: hasAny('delivery_orders.view') },
         ],
     },
     {
@@ -120,6 +141,7 @@ const menu = computed(() => [
             { label: t('payment_methods'), route: 'admin.payment-methods.index', visible: hasAny('payment_methods.view') },
             { label: t('tax_rates'), route: 'admin.tax-rates.index', visible: hasAny('tax_rates.view') },
             { label: t('system_settings'), route: 'admin.settings.index', visible: hasAny('system_settings.view') },
+            { label: t('notification_templates'), route: 'admin.notification-templates.index', visible: hasAny('notification_templates.view') },
             { label: t('audit_logs'), route: 'admin.audit-logs.index', visible: hasAny('audit_logs.view') },
         ],
     },

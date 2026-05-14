@@ -1,14 +1,23 @@
 @php
     /**
      * @var int $id
-     * @var string $editRoute
-     * @var string $destroyRoute
+     * @var string|null $editRoute
+     * @var string|null $destroyRoute
+     * @var string|null $showRoute
      * @var bool $canEdit
      * @var bool $canDelete
      */
 @endphp
 <div class="d-flex gap-1">
-    @if ($canEdit ?? true)
+    @isset($showRoute)
+        <a href="{{ route($showRoute, $id) }}"
+           class="btn btn-sm btn-outline-secondary"
+           data-inertia
+           title="{{ __('coffee.view') }}">
+            <i class="bi bi-eye"></i>
+        </a>
+    @endisset
+    @if (($canEdit ?? true) && ! empty($editRoute))
         <a href="{{ route($editRoute, $id) }}"
            class="btn btn-sm btn-outline-primary"
            data-inertia
@@ -16,7 +25,7 @@
             <i class="bi bi-pencil"></i>
         </a>
     @endif
-    @if ($canDelete ?? true)
+    @if (($canDelete ?? true) && ! empty($destroyRoute))
         <button type="button"
                 class="btn btn-sm btn-outline-danger js-confirm-delete"
                 data-url="{{ route($destroyRoute, $id) }}"

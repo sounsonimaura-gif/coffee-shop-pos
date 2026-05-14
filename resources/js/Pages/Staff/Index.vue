@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from '@/composables/useI18n.js';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import YajraDataTable from '@/Components/YajraDataTable.vue';
@@ -24,9 +24,20 @@ function renderColumns() {
             title: c.title,
             orderable: c.orderable,
             searchable: c.searchable,
-            render: (d) => (d === null || d === undefined ? '' : String(d)),
+            render: (data) => {
+                if (data === true || data === 1 || data === '1') return '<span class="badge bg-success">' + t('yes') + '</span>';
+                if (data === false || data === 0 || data === '0') return '<span class="badge bg-secondary">' + t('no') + '</span>';
+                if (data === null || data === undefined) return '';
+                return String(data);
+            },
         })),
-        { data: 'actions', name: 'actions', title: t('actions'), orderable: false, searchable: false },
+        {
+            data: 'actions',
+            name: 'actions',
+            title: t('actions'),
+            orderable: false,
+            searchable: false,
+        },
     ];
 }
 
@@ -36,8 +47,19 @@ function onClick(e) {
         e.preventDefault();
         confirmDelete({
             url: btn.dataset.url,
+            title: t('are_you_sure'),
+            text: t('you_cannot_undo_this'),
+            confirmButtonText: t('yes_delete_it'),
+            cancelButtonText: t('cancel'),
+            successMessage: t('deleted_successfully'),
             onSuccess: () => refreshKey.value++,
         });
+        return;
+    }
+    const link = e.target.closest('a[data-inertia]');
+    if (link) {
+        e.preventDefault();
+        router.visit(link.getAttribute('href'));
     }
 }
 </script>
@@ -47,7 +69,11 @@ function onClick(e) {
         <div class="card" @click="onClick">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">{{ t(titleKey.replace('coffee.', '')) }}</h5>
-                <Link v-if="routes.create && permissions.create" :href="route(routes.create)" class="btn btn-primary btn-sm">
+                <Link
+                    v-if="permissions.create"
+                    :href="route(routes.create)"
+                    class="btn btn-primary btn-sm"
+                >
                     <i class="bi bi-plus-lg me-1"></i>{{ t('new') }}
                 </Link>
             </div>
