@@ -32,11 +32,11 @@ class StockAdjustmentsController extends Controller
                 'destroy' => 'admin.stock-adjustments.destroy',
             ],
             'columns' => [
-                ['data' => 'adjusted_at', 'name' => 'adjusted_at', 'title' => __('coffee.date')],
-                ['data' => 'ingredient_name', 'name' => 'ingredient.name', 'title' => __('coffee.ingredient')],
-                ['data' => 'adjustment_type', 'name' => 'adjustment_type', 'title' => __('coffee.adjustment_type')],
-                ['data' => 'quantity', 'name' => 'quantity', 'title' => __('coffee.quantity')],
-                ['data' => 'reason', 'name' => 'reason', 'title' => __('coffee.reason')],
+                ['data' => 'adjusted_at', 'name' => 'adjusted_at', 'title' => 'coffee.date'],
+                ['data' => 'ingredient_name', 'name' => 'ingredient.name', 'title' => 'coffee.ingredient'],
+                ['data' => 'adjustment_type', 'name' => 'adjustment_type', 'title' => 'coffee.adjustment_type'],
+                ['data' => 'quantity', 'name' => 'quantity', 'title' => 'coffee.quantity'],
+                ['data' => 'reason', 'name' => 'reason', 'title' => 'coffee.reason'],
             ],
             'permissions' => $this->permsForFront('stock_adjustments'),
         ]);

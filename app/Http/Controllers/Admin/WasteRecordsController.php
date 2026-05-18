@@ -32,12 +32,12 @@ class WasteRecordsController extends Controller
                 'destroy' => 'admin.waste-records.destroy',
             ],
             'columns' => [
-                ['data' => 'waste_date', 'name' => 'waste_date', 'title' => __('coffee.date')],
-                ['data' => 'ingredient_name', 'name' => 'ingredient.name', 'title' => __('coffee.ingredient')],
-                ['data' => 'waste_type', 'name' => 'waste_type', 'title' => __('coffee.type')],
-                ['data' => 'quantity', 'name' => 'quantity', 'title' => __('coffee.quantity')],
-                ['data' => 'cost_amount', 'name' => 'cost_amount', 'title' => __('coffee.cost')],
-                ['data' => 'reason', 'name' => 'reason', 'title' => __('coffee.reason')],
+                ['data' => 'waste_date', 'name' => 'waste_date', 'title' => 'coffee.date'],
+                ['data' => 'ingredient_name', 'name' => 'ingredient.name', 'title' => 'coffee.ingredient'],
+                ['data' => 'waste_type', 'name' => 'waste_type', 'title' => 'coffee.type'],
+                ['data' => 'quantity', 'name' => 'quantity', 'title' => 'coffee.quantity'],
+                ['data' => 'cost_amount', 'name' => 'cost_amount', 'title' => 'coffee.cost'],
+                ['data' => 'reason', 'name' => 'reason', 'title' => 'coffee.reason'],
             ],
             'permissions' => $this->permsForFront('waste_records'),
         ]);

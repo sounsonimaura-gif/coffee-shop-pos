@@ -24,11 +24,11 @@ class SaleInvoicesController extends Controller
                 'show' => 'admin.sale-invoices.show',
             ],
             'columns' => [
-                ['data' => 'sale_no', 'name' => 'sale_no', 'title' => __('coffee.code')],
-                ['data' => 'sale_at', 'name' => 'sale_at', 'title' => __('coffee.from')],
-                ['data' => 'grand_total', 'name' => 'grand_total', 'title' => __('coffee.total')],
-                ['data' => 'paid_amount', 'name' => 'paid_amount', 'title' => __('coffee.paid')],
-                ['data' => 'status', 'name' => 'status', 'title' => __('coffee.status')],
+                ['data' => 'sale_no', 'name' => 'sale_no', 'title' => 'coffee.code'],
+                ['data' => 'sale_at', 'name' => 'sale_at', 'title' => 'coffee.from'],
+                ['data' => 'grand_total', 'name' => 'grand_total', 'title' => 'coffee.total'],
+                ['data' => 'paid_amount', 'name' => 'paid_amount', 'title' => 'coffee.paid'],
+                ['data' => 'status', 'name' => 'status', 'title' => 'coffee.status'],
             ],
         ]);
     }

@@ -32,11 +32,11 @@ class RecipesController extends Controller
                 'destroy' => 'admin.recipes.destroy',
             ],
             'columns' => [
-                ['data' => 'menu_item_name', 'name' => 'menuItem.name', 'title' => __('coffee.menu_item')],
-                ['data' => 'menu_size_name', 'name' => 'menuSize.name', 'title' => __('coffee.size')],
-                ['data' => 'name', 'name' => 'name', 'title' => __('coffee.name')],
-                ['data' => 'estimated_cost', 'name' => 'estimated_cost', 'title' => __('coffee.estimated_cost')],
-                ['data' => 'is_active', 'name' => 'is_active', 'title' => __('coffee.is_active')],
+                ['data' => 'menu_item_name', 'name' => 'menuItem.name', 'title' => 'coffee.menu_item'],
+                ['data' => 'menu_size_name', 'name' => 'menuSize.name', 'title' => 'coffee.size'],
+                ['data' => 'name', 'name' => 'name', 'title' => 'coffee.name'],
+                ['data' => 'estimated_cost', 'name' => 'estimated_cost', 'title' => 'coffee.estimated_cost'],
+                ['data' => 'is_active', 'name' => 'is_active', 'title' => 'coffee.is_active'],
             ],
             'permissions' => $this->permsForFront('recipes'),
         ]);

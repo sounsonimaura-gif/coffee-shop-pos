@@ -142,7 +142,27 @@ const menu = computed(() => [
             { label: t('tax_rates'), route: 'admin.tax-rates.index', visible: hasAny('tax_rates.view') },
             { label: t('system_settings'), route: 'admin.settings.index', visible: hasAny('system_settings.view') },
             { label: t('notification_templates'), route: 'admin.notification-templates.index', visible: hasAny('notification_templates.view') },
+            { label: t('code_sequences'), route: 'admin.code-sequences.index', visible: hasAny('code_sequences.view') },
+        ],
+    },
+    {
+        label: t('system'),
+        icon: 'bi-shield-lock',
+        visible: hasAny(
+            'audit_logs.view',
+            'login_histories.view',
+            'stock_alerts.view',
+            'database_backups.view',
+            'report_exports.view',
+        ),
+        children: [
             { label: t('audit_logs'), route: 'admin.audit-logs.index', visible: hasAny('audit_logs.view') },
+            { label: t('login_histories'), route: 'admin.login-histories.index', visible: hasAny('login_histories.view') },
+            { label: t('stock_alerts'), route: 'admin.stock-alerts.index', visible: hasAny('stock_alerts.view') },
+            { label: t('loyalty_point_transactions'), route: 'admin.loyalty-point-transactions.index', visible: hasAny('loyalty_point_transactions.view') },
+            { label: t('notifications'), route: 'admin.notifications.index', visible: hasAny('notifications.view') },
+            { label: t('database_backups'), route: 'admin.database-backups.index', visible: hasAny('database_backups.view') },
+            { label: t('report_exports'), route: 'admin.report-exports.index', visible: hasAny('report_exports.view') },
         ],
     },
 ]);

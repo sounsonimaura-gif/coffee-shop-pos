@@ -20,10 +20,10 @@ class PermissionsController extends Controller
                 'data' => 'admin.permissions.data',
             ],
             'columns' => [
-                ['data' => 'module', 'name' => 'module', 'title' => __('coffee.module'), 'orderable' => true, 'searchable' => true],
-                ['data' => 'name', 'name' => 'name', 'title' => __('coffee.code'), 'orderable' => true, 'searchable' => true],
-                ['data' => 'label', 'name' => 'label', 'title' => __('coffee.name'), 'orderable' => true, 'searchable' => true],
-                ['data' => 'description', 'name' => 'description', 'title' => __('coffee.description'), 'orderable' => true, 'searchable' => true],
+                ['data' => 'module', 'name' => 'module', 'title' => 'coffee.module', 'orderable' => true, 'searchable' => true],
+                ['data' => 'name', 'name' => 'name', 'title' => 'coffee.code', 'orderable' => true, 'searchable' => true],
+                ['data' => 'label', 'name' => 'label', 'title' => 'coffee.name', 'orderable' => true, 'searchable' => true],
+                ['data' => 'description', 'name' => 'description', 'title' => 'coffee.description', 'orderable' => true, 'searchable' => true],
             ],
         ]);
     }

@@ -3,11 +3,13 @@
 use App\Http\Controllers\Admin\AuditLogsController;
 use App\Http\Controllers\Admin\BranchesController;
 use App\Http\Controllers\Admin\CashierShiftsController;
+use App\Http\Controllers\Admin\CodeSequencesController;
 use App\Http\Controllers\Admin\CommissionsController;
 use App\Http\Controllers\Admin\CompaniesController;
 use App\Http\Controllers\Admin\CouponsController;
 use App\Http\Controllers\Admin\CustomersController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DatabaseBackupsController;
 use App\Http\Controllers\Admin\DeliveryOrdersController;
 use App\Http\Controllers\Admin\DiningTablesController;
 use App\Http\Controllers\Admin\ExpenseCategoriesController;
@@ -15,12 +17,15 @@ use App\Http\Controllers\Admin\ExpensesController;
 use App\Http\Controllers\Admin\IngredientCategoriesController;
 use App\Http\Controllers\Admin\IngredientsController;
 use App\Http\Controllers\Admin\KitchenStationsController;
+use App\Http\Controllers\Admin\LoginHistoriesController;
+use App\Http\Controllers\Admin\LoyaltyPointTransactionsController;
 use App\Http\Controllers\Admin\MembershipLevelsController;
 use App\Http\Controllers\Admin\MenuAddonsController;
 use App\Http\Controllers\Admin\MenuCategoriesController;
 use App\Http\Controllers\Admin\MenuItemsController;
 use App\Http\Controllers\Admin\MenuOptionsController;
 use App\Http\Controllers\Admin\MenuSizesController;
+use App\Http\Controllers\Admin\NotificationsController;
 use App\Http\Controllers\Admin\NotificationTemplatesController;
 use App\Http\Controllers\Admin\OnlineOrdersController;
 use App\Http\Controllers\Admin\OrdersController;
@@ -33,6 +38,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\PromotionsController;
 use App\Http\Controllers\Admin\PurchasesController;
 use App\Http\Controllers\Admin\RecipesController;
+use App\Http\Controllers\Admin\ReportExportsController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\RolesController;
 use App\Http\Controllers\Admin\SaleInvoicesController;
@@ -40,6 +46,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffSchedulesController;
 use App\Http\Controllers\Admin\StockAdjustmentsController;
+use App\Http\Controllers\Admin\StockAlertsController;
 use App\Http\Controllers\Admin\StockTransfersController;
 use App\Http\Controllers\Admin\SuppliersController;
 use App\Http\Controllers\Admin\TableFloorsController;
@@ -165,6 +172,21 @@ Route::middleware('auth')->group(function () {
         Route::get('/recipes/{id}/edit', [RecipesController::class, 'edit'])->name('recipes.edit');
         Route::put('/recipes/{id}', [RecipesController::class, 'update'])->name('recipes.update');
         Route::delete('/recipes/{id}', [RecipesController::class, 'destroy'])->name('recipes.destroy');
+
+        // System / read-only viewers
+        foreach ([
+            'notifications' => NotificationsController::class,
+            'login-histories' => LoginHistoriesController::class,
+            'stock-alerts' => StockAlertsController::class,
+            'loyalty-point-transactions' => LoyaltyPointTransactionsController::class,
+            'code-sequences' => CodeSequencesController::class,
+            'database-backups' => DatabaseBackupsController::class,
+            'report-exports' => ReportExportsController::class,
+        ] as $slug => $controller) {
+            Route::get("/{$slug}", [$controller, 'index'])->name("{$slug}.index");
+            Route::get("/{$slug}/data", [$controller, 'data'])->name("{$slug}.data");
+        }
+        Route::post('/stock-alerts/{id}/acknowledge', [StockAlertsController::class, 'acknowledge'])->name('stock-alerts.acknowledge');
 
         // Generated simple CRUDs (companies, branches, users, roles, menu, etc.)
         foreach ([
