@@ -136,7 +136,9 @@ abstract class BaseCrudController extends Controller
             'columns' => collect($this->columns())->map(fn ($c) => [
                 'data' => $c['data'],
                 'name' => $c['name'] ?? $c['data'],
-                'title' => __($c['title']),
+                // Send the raw translation key so the Vue layer can re-translate
+                // column titles when the user switches language without a full reload.
+                'title' => $c['title'],
                 'orderable' => $c['orderable'] ?? true,
                 'searchable' => $c['searchable'] ?? true,
             ])->values()->all(),

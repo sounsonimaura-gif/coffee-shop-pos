@@ -21,7 +21,7 @@ function renderColumns() {
         ...props.columns.map((c) => ({
             data: c.data,
             name: c.name,
-            title: c.title,
+            title: c.title && c.title.startsWith('coffee.') ? t(c.title.slice(7)) : t(c.title || ''),
             render: (data) => (data === null || data === undefined ? '' : String(data)),
         })),
         { data: 'actions', name: 'actions', title: t('actions'), orderable: false, searchable: false },

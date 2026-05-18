@@ -37,12 +37,12 @@ class PurchasesController extends Controller
                 'destroy' => 'admin.purchases.destroy',
             ],
             'columns' => [
-                ['data' => 'purchase_no', 'name' => 'purchase_no', 'title' => __('coffee.code')],
-                ['data' => 'purchase_date', 'name' => 'purchase_date', 'title' => __('coffee.date')],
-                ['data' => 'supplier_name', 'name' => 'supplier.name', 'title' => __('coffee.supplier')],
-                ['data' => 'grand_total', 'name' => 'grand_total', 'title' => __('coffee.grand_total')],
-                ['data' => 'purchase_status', 'name' => 'purchase_status', 'title' => __('coffee.status')],
-                ['data' => 'payment_status', 'name' => 'payment_status', 'title' => __('coffee.payment_status')],
+                ['data' => 'purchase_no', 'name' => 'purchase_no', 'title' => 'coffee.code'],
+                ['data' => 'purchase_date', 'name' => 'purchase_date', 'title' => 'coffee.date'],
+                ['data' => 'supplier_name', 'name' => 'supplier.name', 'title' => 'coffee.supplier'],
+                ['data' => 'grand_total', 'name' => 'grand_total', 'title' => 'coffee.grand_total'],
+                ['data' => 'purchase_status', 'name' => 'purchase_status', 'title' => 'coffee.status'],
+                ['data' => 'payment_status', 'name' => 'payment_status', 'title' => 'coffee.payment_status'],
             ],
             'permissions' => $this->permsForFront('purchases'),
         ]);

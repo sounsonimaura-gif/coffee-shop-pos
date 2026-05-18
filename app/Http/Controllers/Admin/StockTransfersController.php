@@ -36,11 +36,11 @@ class StockTransfersController extends Controller
                 'destroy' => 'admin.stock-transfers.destroy',
             ],
             'columns' => [
-                ['data' => 'transfer_no', 'name' => 'transfer_no', 'title' => __('coffee.code')],
-                ['data' => 'transfer_date', 'name' => 'transfer_date', 'title' => __('coffee.date')],
-                ['data' => 'from_branch_name', 'name' => 'fromBranch.name', 'title' => __('coffee.from_branch')],
-                ['data' => 'to_branch_name', 'name' => 'toBranch.name', 'title' => __('coffee.to_branch')],
-                ['data' => 'status', 'name' => 'status', 'title' => __('coffee.status')],
+                ['data' => 'transfer_no', 'name' => 'transfer_no', 'title' => 'coffee.code'],
+                ['data' => 'transfer_date', 'name' => 'transfer_date', 'title' => 'coffee.date'],
+                ['data' => 'from_branch_name', 'name' => 'fromBranch.name', 'title' => 'coffee.from_branch'],
+                ['data' => 'to_branch_name', 'name' => 'toBranch.name', 'title' => 'coffee.to_branch'],
+                ['data' => 'status', 'name' => 'status', 'title' => 'coffee.status'],
             ],
             'permissions' => $this->permsForFront('stock_transfers'),
         ]);
