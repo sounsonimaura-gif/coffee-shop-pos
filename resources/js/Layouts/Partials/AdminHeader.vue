@@ -1,10 +1,12 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n, setLocale } from '@/composables/useI18n.js';
 
 const page = usePage();
 const { t, locale } = useI18n();
+
+const layout = inject('admin-layout', null);
 
 const user = computed(() => page.props.auth?.user || null);
 const activeBranchId = computed(() => page.props.auth?.active_branch_id);
@@ -12,6 +14,20 @@ const branches = computed(() => user.value?.branches || []);
 const activeBranch = computed(() =>
     branches.value.find((b) => b.id === activeBranchId.value) || branches.value[0] || null
 );
+
+const userInitials = computed(() => {
+    const name = user.value?.name || 'U';
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p[0].toUpperCase())
+        .join('');
+});
+
+function toggleSidebar() {
+    if (layout?.toggleSidebar) layout.toggleSidebar();
+}
 
 function logout() {
     router.post(route('logout'));
@@ -33,10 +49,10 @@ function switchBranch(branchId) {
 <template>
     <header class="top-header">
         <nav class="navbar navbar-expand">
-            <div class="mobile-toggle-icon d-xl-none">
+            <div class="mobile-toggle-icon" @click="toggleSidebar" role="button" :aria-label="t('toggle_sidebar')">
                 <i class="bi bi-list"></i>
             </div>
-            <div class="top-navbar d-none d-xl-block">
+            <div class="top-navbar d-none d-md-block">
                 <ul class="navbar-nav align-items-center">
                     <li class="nav-item">
                         <Link class="nav-link" :href="route('admin.dashboard')">{{ t('dashboard') }}</Link>
@@ -98,8 +114,8 @@ function switchBranch(branchId) {
                     <!-- User dropdown -->
                     <li class="nav-item dropdown dropdown-large">
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
-                            <div class="user-setting d-flex align-items-center gap-1">
-                                <img src="/assets/backend/assets/images/avatars/avatar-1.png" class="user-img" alt="" onerror="this.style.display='none'" />
+                            <div class="user-setting d-flex align-items-center gap-2">
+                                <span class="user-img">{{ userInitials }}</span>
                                 <div class="user-name d-none d-sm-block">{{ user?.name || 'Guest' }}</div>
                             </div>
                         </a>

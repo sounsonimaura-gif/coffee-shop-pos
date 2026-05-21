@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from '@/composables/useI18n.js';
 
@@ -7,6 +7,9 @@ const page = usePage();
 const { t } = useI18n();
 
 const perms = computed(() => page.props.auth?.user?.permissions || []);
+
+// Index of the currently expanded top-level group (null = none).
+const openIndex = ref(null);
 
 function hasAny(...required) {
     if (perms.value.includes('*')) return true;
@@ -180,25 +183,48 @@ function isParentActive(item) {
     if (!item.children) return false;
     return item.children.some((c) => isActive(c.route));
 }
+
+function isOpen(index, item) {
+    if (openIndex.value === index) return true;
+    if (openIndex.value === null && isParentActive(item)) return true;
+    return false;
+}
+
+function toggleGroup(index) {
+    openIndex.value = openIndex.value === index ? null : index;
+}
+
+// Auto-open the group containing the currently active route whenever the URL changes.
+watch(
+    () => page.url,
+    () => {
+        const items = menu.value;
+        const activeIdx = items.findIndex((it) => it.children && isParentActive(it));
+        if (activeIdx >= 0) {
+            openIndex.value = activeIdx;
+        }
+    },
+    { immediate: true }
+);
 </script>
 
 <template>
-    <aside class="sidebar-wrapper" data-simplebar="true">
+    <aside class="sidebar-wrapper">
         <div class="sidebar-header">
-            <div>
-                <img src="/assets/backend/assets/images/logo-icon.png" class="logo-icon" alt="logo icon" onerror="this.style.display='none'" />
+            <div class="sidebar-header-icon">
+                <i class="bi bi-cup-hot-fill"></i>
             </div>
             <div>
                 <h4 class="logo-text">{{ t('app_name') }}</h4>
-            </div>
-            <div class="toggle-icon ms-auto">
-                <i class="bi bi-chevron-double-left"></i>
             </div>
         </div>
 
         <ul class="metismenu" id="menu">
             <template v-for="(item, i) in menu" :key="i">
-                <li v-if="item.visible" :class="{ 'mm-active': isActive(item.route) || isParentActive(item) }">
+                <li
+                    v-if="item.visible"
+                    :class="{ 'mm-active': isActive(item.route) || isOpen(i, item) }"
+                >
                     <Link
                         v-if="item.route && !item.children"
                         :href="route(item.route)"
@@ -207,11 +233,16 @@ function isParentActive(item) {
                         <div class="parent-icon"><i :class="['bi', item.icon]"></i></div>
                         <div class="menu-title">{{ item.label }}</div>
                     </Link>
-                    <a v-else href="javascript:;" :class="['has-arrow', { 'mm-active': isParentActive(item) }]">
+                    <a
+                        v-else
+                        href="javascript:;"
+                        :class="['has-arrow', { 'mm-active': isOpen(i, item) }]"
+                        @click.prevent="toggleGroup(i)"
+                    >
                         <div class="parent-icon"><i :class="['bi', item.icon]"></i></div>
                         <div class="menu-title">{{ item.label }}</div>
                     </a>
-                    <ul v-if="item.children" :class="{ 'mm-show': isParentActive(item) }">
+                    <ul v-if="item.children" :class="{ 'mm-show': isOpen(i, item) }">
                         <template v-for="(child, j) in item.children" :key="j">
                             <li v-if="child.visible">
                                 <Link
@@ -228,3 +259,17 @@ function isParentActive(item) {
         </ul>
     </aside>
 </template>
+
+<style scoped>
+.sidebar-header-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #0d6efd;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+</style>

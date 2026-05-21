@@ -7,6 +7,9 @@
 @import "tom-select/dist/css/tom-select.bootstrap5.min.css";
 @import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 
+// Admin layout (sidebar + header + content shell)
+@import "./admin-layout.scss";
+
 // Custom helpers
 .tom-select-bs5 .ts-control {
     border-color: var(--bs-border-color);
