@@ -57,27 +57,29 @@ function switchBranch(branchId) {
                     <li class="nav-item">
                         <Link class="nav-link" :href="route('admin.dashboard')">{{ t('dashboard') }}</Link>
                     </li>
-                    <li class="nav-item" v-if="activeBranch">
-                        <div class="dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-shop me-1"></i>
-                                {{ activeBranch.name }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="dropdown-header">{{ t('switch_branch') }}</li>
-                                <li v-for="b in branches" :key="b.id">
-                                    <button
-                                        class="dropdown-item"
-                                        :class="{ active: b.id === activeBranchId }"
-                                        type="button"
-                                        @click="switchBranch(b.id)"
-                                    >
-                                        {{ b.name }}
-                                        <small class="text-muted ms-2">{{ b.code }}</small>
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
+                    <li class="nav-item dropdown" v-if="activeBranch">
+                        <a
+                            class="nav-link dropdown-toggle dropdown-toggle-nocaret has-caret"
+                            href="#"
+                            data-bs-toggle="dropdown"
+                        >
+                            <i class="bi bi-shop"></i>
+                            <span class="fw-medium">{{ activeBranch.name }}</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header">{{ t('switch_branch') }}</li>
+                            <li v-for="b in branches" :key="b.id">
+                                <button
+                                    class="dropdown-item"
+                                    :class="{ active: b.id === activeBranchId }"
+                                    type="button"
+                                    @click="switchBranch(b.id)"
+                                >
+                                    {{ b.name }}
+                                    <small class="ms-2">{{ b.code }}</small>
+                                </button>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -93,9 +95,14 @@ function switchBranch(branchId) {
                 <ul class="navbar-nav align-items-center">
                     <!-- Language switcher (no full page reload) -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
+                        <a
+                            class="nav-link dropdown-toggle dropdown-toggle-nocaret has-caret"
+                            href="#"
+                            data-bs-toggle="dropdown"
+                            :aria-label="t('language')"
+                        >
                             <i class="bi bi-globe2"></i>
-                            <span class="ms-1 text-uppercase">{{ locale }}</span>
+                            <span class="text-uppercase fw-medium">{{ locale }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
@@ -113,25 +120,26 @@ function switchBranch(branchId) {
 
                     <!-- User dropdown -->
                     <li class="nav-item dropdown dropdown-large">
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
+                        <a
+                            class="nav-link dropdown-toggle dropdown-toggle-nocaret has-caret"
+                            href="#"
+                            data-bs-toggle="dropdown"
+                            :aria-label="user?.name || 'User menu'"
+                        >
                             <div class="user-setting d-flex align-items-center gap-2">
                                 <span class="user-img">{{ userInitials }}</span>
-                                <div class="user-name d-none d-sm-block">{{ user?.name || 'Guest' }}</div>
+                                <span class="user-name d-none d-sm-block">{{ user?.name || 'Guest' }}</span>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <a class="dropdown-item" href="javascript:;">
-                                    <div class="d-flex align-items-center">
-                                        <div class="setting-icon">
-                                            <i class="bi bi-person-fill"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 dropdown-user-name">{{ user?.name }}</h6>
-                                            <small class="text-secondary">{{ user?.role?.name || t('user') }}</small>
-                                        </div>
+                                <div class="dropdown-user-card">
+                                    <span class="user-img">{{ userInitials }}</span>
+                                    <div>
+                                        <h6 class="dropdown-user-name">{{ user?.name }}</h6>
+                                        <small>{{ user?.role?.name || t('user') }}</small>
                                     </div>
-                                </a>
+                                </div>
                             </li>
                             <li><hr class="dropdown-divider" /></li>
                             <li>
