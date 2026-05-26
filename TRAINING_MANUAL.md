@@ -1,52 +1,87 @@
-# មេរៀនប្រើប្រាស់ប្រព័ន្គ — Student Profile Management System
+# មេរៀនប្រើប្រាស់ប្រព័ន្ធ — Coffee Shop & POS Management System
 # (Training Manual)
 
-> **ជំពូកទី ១ — ទិដ្ឋភាពទូទៅ**
+> **ជំពូកទី ១ — ទិដ្ឋភាពទូទៅ (Overview)**
 
 ---
 
 ## ១.១ អ្វីជា Project នេះ?
 
-**Student Profile Management System** គឺជា Web Application ប្រើប្រាស់ Laravel Framework សម្រាប់គ្រប់គ្រងព័ត៌មានសិស្សពេញលេញ ចាប់ពីការចុះឈ្មោះ (Enrollment) រហូតដល់ការបោះពុម្ពកាត (Student Card) វិញ្ញាបនបត្រ (Certificate) និងសញ្ញាបត្រ (Diploma)។ ប្រព័ន្ធនេះគាំទ្រពហុសាខា (Multi-Branch) និងមានការគ្រប់គ្រសិទ្ធិ (Role-Based Access Control)។
+**Coffee Shop & POS Management System** គឺជា Web Application សាងសង់ឡើងលើ **Laravel 12 + Vue 3 + Inertia.js** សម្រាប់គ្រប់គ្រងប្រតិបត្តិការហាងកាហ្វេ / ភោជនីយដ្ឋានពេញលេញ ចាប់ពី**ការគ្រប់គ្រងបញ្ជី (Stock)**, **ការទិញ (Purchases)**, **ការលក់ (POS)**, **ការវាយតម្លៃរូបមន្ត (Recipes)**, **ការគ្រប់គ្រងបុគ្គលិក (HR)**, រហូតដល់**ការបញ្ជាទិញតាមអ៊ីនធឺណិត (Online & Delivery Orders)**។
+
+ប្រព័ន្ធនេះគាំទ្រ **Multi-Company / Multi-Branch** (ក្រុមហ៊ុនច្រើន សាខាច្រើន) ដោយប្រើ `company_id` និង active-branch context កំណត់នៅក្នុង session ហើយ share ឡើង Vue តាមរយៈ Inertia shared props។
+
+| លក្ខណៈ | ការពិពណ៌នា |
+|---|---|
+| Multi-tenant | Data scoped by `company_id` + active branch |
+| RBAC | Manual Roles + Permissions (មិនប្រើ Spatie package) |
+| i18n | Khmer / English switching មិន reload page |
+| POS Flow | Cashier Shift → Orders → Sale Invoices → Payments |
+| Stock Ledger | Centralized `StockService` — atomic writes ទៅ `stock_movements`, `stock_balances`, `stock_batches` |
+| Auto-calc | Recipe cost roll-up, Payroll net salary, Commission amount |
 
 ## ១.២ បច្ចេកវិទ្យាដែលប្រើ (Tech Stack)
 
 | ផ្នែក | បច្ចេកវិទ្យា |
 |---|---|
 | Backend Framework | **Laravel 12** (PHP 8.2+) |
-| Frontend CSS | **TailwindCSS 3** |
-| Frontend JS | **AlpineJS**, **Vue 3** |
+| Frontend Framework | **Vue 3** + **Inertia.js** |
+| Server-side Routes in JS | **Ziggy** |
 | Build Tool | **Vite** |
-| Database | **SQLite** (default) ឬ **MySQL** |
-| DataTables | **Yajra DataTables** |
-| Notifications | **PHP-Flasher**, **SweetAlert2** |
-| Date Picker | **Flatpickr** |
-| Select Box | **Tom Select** |
-| Auth | **Laravel Breeze** |
+| CSS Framework | **Bootstrap 5** (custom admin SCSS, no Skodash theme) |
+| DataTables | **Yajra DataTables** server-side processing (loaded from CDN as classic scripts — see §១០.១) |
+| Select Inputs | **Tom Select** |
+| Date/Time Pickers | **flatpickr** |
+| Confirm Dialogs | **SweetAlert2** |
+| Toast Notifications | **PHP-Flasher** |
+| Database | **MySQL 8** ឬ **SQLite** (default for local/CI) |
+| Pagination | Fixed Bootstrap 5 rounded pagination (centered, no jump) |
+| Auth | Custom session-based login (no Breeze / Jetstream) |
 
 ## ១.៣ រចនាសម្ព័ន្ធ Project (Folder Structure)
 
 ```
-student-profile-management/
+coffee-shop-pos/
 ├── app/
-│   ├── Helpers/helpers.php          # Helper functions (current_branch_id, slug, etc.)
-│   ├── Http/Controllers/           # 35+ Controllers for all modules
-│   ├── Models/                       # 42 Eloquent Models
-│   ├── Policies/                     # Authorization policies
-│   └── Providers/                    # Service providers
-├── config/
-│   └── app.php                       # APP_NAME, APP_NAME_KH, APP_NAME_EN
+│   ├── Helpers/                       # current_company_id(), current_branch_id(), can_user()
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Admin/                  # 55 admin controllers (one per module)
+│   │   │   ├── Auth/LoginController.php
+│   │   │   ├── BranchSwitcherController.php
+│   │   │   └── LocaleController.php
+│   │   └── Middleware/CheckPermission.php
+│   ├── Models/                          # 75 Eloquent models — one per business table
+│   ├── Services/StockService.php        # Atomic stock ledger writes
+│   └── Providers/                       # AppServiceProvider, AuthServiceProvider
+├── config/                              # app.php (locales), permission.php (modules)
 ├── database/
 │   ├── migrations/
-│   │   └── 2026_04_29_000000_create_student_profile_system_all_tables.php
-│   └── seeders/                      # 25+ seeders with demo data
+│   │   └── 2026_05_13_000000_create_coffee_shop_pos_all_tables.php   # 78 tables (75 business + 3 Laravel built-ins)
+│   └── seeders/
+│       ├── DatabaseSeeder.php           # Demo company + roles + users
+│       ├── PermissionSeeder.php         # Master permissions for all modules
+│       └── SampleDataSeeder.php         # Demo branches, menu items, customers
+├── lang/
+│   ├── en/coffee.php                    # English strings (~300 keys)
+│   └── kh/coffee.php                    # Khmer strings (~300 keys)
 ├── resources/
-│   └── views/admin/                  # All admin Blade views
-├── public/
-│   └── images/logo.png               # School logo for cards
+│   ├── js/
+│   │   ├── app.js                       # Inertia + Ziggy + Vue 3 entry
+│   │   ├── bootstrap.js                 # axios + global helpers
+│   │   ├── Layouts/AdminLayout.vue      # Sidebar + header + collapse toggle
+│   │   ├── Pages/Admin/<Module>/Index.vue + Form.vue
+│   │   ├── Pages/Auth/Login.vue
+│   │   ├── components/                  # ConfirmDelete, FlashToast, FlatpickrInput, TomSelectInput, YajraTable, BsPagination
+│   │   └── lang/{en,kh}.json            # Vue-side i18n bundle (mirror of lang/{en,kh}/coffee.php)
+│   ├── sass/admin-layout.scss           # Bootstrap-based admin layout (sidebar, header, transitions)
+│   └── views/
+│       ├── app.blade.php                # Inertia root + jQuery/DataTables CDN scripts
+│       └── auth/login.blade.php         # Standalone login page (no Inertia)
 ├── routes/
-│   └── web.php                       # All application routes
-└── .env                              # Environment configuration
+│   └── web.php                          # 80+ routes under /admin prefix
+├── public/build/                        # Vite output (gitignored)
+└── .agents/skills/testing-coffee-shop-pos/SKILL.md   # Testing playbook
 ```
 
 ---
@@ -57,98 +92,108 @@ student-profile-management/
 
 ## ២.១ តម្រូវការប្រព័ន្ធ (System Requirements)
 
-- **PHP**: 8.2 ឬខ្ពស់ជាង
-- **Composer**: ជំនាន់ចុងក្រោយ
-- **Node.js & NPM**: សម្រាប់ compile frontend assets
-- **Database**: SQLite (default) ឬ MySQL 8.0+
+- **PHP**: 8.2+
+- **Composer**: 2.x
+- **Node.js**: 18+ (npm or pnpm)
+- **Database**: MySQL 8 / MariaDB 10.5+ (recommended for production), or SQLite (default for local)
 
 ## ២.២ ជំហានដំឡើង (Step-by-Step)
 
 ### ជំហាន ១ — Clone និង Install Dependencies
 
 ```bash
-# 1. Clone project (ឬ extract zip)
-cd c:\laragon\www\student-profile-management
+git clone https://github.com/sounsonimaura-gif/coffee-shop-pos.git
+cd coffee-shop-pos
 
-# 2. Install PHP dependencies
 composer install
-
-# 3. Install Node dependencies
 npm install
 ```
 
 ### ជំហាន ២ — កំណត់ Environment
 
 ```bash
-# Copy file .env.example ទៅ .env
-copy .env.example .env
-
-# Generate application key
+cp .env.example .env
 php artisan key:generate
 ```
 
 បើក `.env` ហើយកែតម្រូវ:
 
 ```env
-APP_NAME="SITS Information Technology School"
-APP_NAME_KH="សាលាបច្ចេកវិទ្យាព័ត៌មាន អេស អាយ ធី អេស"
-APP_NAME_EN="SITS INFORMATION TECHNOLOGY SCHOOL"
+APP_NAME="Coffee Shop POS"
+APP_URL=http://127.0.0.1:8000
 
-# For SQLite (default)
+# Default — SQLite (good for local dev)
 DB_CONNECTION=sqlite
 # DB_DATABASE=database/database.sqlite
 
-# For MySQL (optional)
+# Production — MySQL
 # DB_CONNECTION=mysql
 # DB_HOST=127.0.0.1
 # DB_PORT=3306
-# DB_DATABASE=student_profile_db
+# DB_DATABASE=coffee_pos
 # DB_USERNAME=root
 # DB_PASSWORD=
+
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
 ```
 
-### ជំហាន ៣ — បង្កើត Database និង Migrate
+### ជំហាន ៣ — បង្កើត Database, Migrate, និង Seed
 
 ```bash
-# Create SQLite file (if using SQLite)
+# SQLite only
 touch database/database.sqlite
 
-# Run all migrations (creates 24 table groups)
-php artisan migrate
-
-# Seed demo data (25+ seeders with sample data)
-php artisan db:seed
+# Migrate + seed demo data
+php artisan migrate:fresh --seed
 ```
 
-> **ចំណាំ**: Seeder រួមមានទិន្នន័យគំរូសម្រាប់រាជធានី-ខេត្ត ស្រុក ឃុំ ភូមិ ទាំងអស់នៅកម្ពុជា។
+> **ចំណាំ**: `migrate:fresh --seed` នឹង:
+> - បង្កើតតារាងទាំង **75** (បូកនឹង Laravel built-ins ៣ បន្ថែម = ៧៨)
+> - បង្កើតក្រុមហ៊ុនគំរូ **Devin Coffee Co.** (1 company, 1 main branch)
+> - បង្កើត 3 roles: **Super Admin**, **Branch Manager**, **Cashier**
+> - បង្កើតគណនី login គំរូ (មើល §២.៤ ខាងក្រោម)
+> - Seed menu items គំរូ (categories, sizes, items, ingredients, units, suppliers)
 
 ### ជំហាន ៤ — Compile Frontend Assets
 
 ```bash
-# Development mode
+# Dev with hot-reload
 npm run dev
 
-# OR Production build
+# Production build (one-shot)
 npm run build
 ```
 
 ### ជំហាន ៥ — ចាប់ផ្ដើម Server
 
 ```bash
-php artisan serve
+php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-បើក Browser ទៅ `http://localhost:8000`
+បើក Browser ទៅ `http://127.0.0.1:8000/login`
 
-## ២.៣ គណនី Default (Login Credentials)
+## ២.៣ ការត្រួតពិនិត្យដំឡើង (Setup Verification)
 
-បន្ទាប់ពី `php artisan db:seed` គណនី Admin ដំបូងមាន:
-
-| ប្រភេទ | Email | Password |
+| ការត្រួតពិនិត្យ | Command | Expected |
 |---|---|---|
-| Admin | `admin@sits.edu.kh` | `password` |
+| Lint | `vendor/bin/pint --test` | passes |
+| Frontend build | `npm run build` | no errors |
+| Migrations | `php artisan migrate:status` | 1 migration, status `Ran` |
+| Routes | `php artisan route:list \| grep admin \| wc -l` | 80+ routes |
+| Login | curl `/login` | HTTP 200 |
 
-> ប្ដូរពាក្យសម្ងាត់ភ្លាមបន្ទាប់ពី Login លើកដំបូង!
+## ២.៤ គណនី Default (Demo Logins)
+
+បន្ទាប់ពី `php artisan db:seed` គណនីខាងក្រោមមាន (password ទាំងអស់ = `password`):
+
+| ប្រភេទ | Email | Role |
+|---|---|---|
+| Super Admin | `admin@coffee.test` | Super Admin — bypass permission checks |
+| Manager | `manager@coffee.test` | Branch Manager |
+| Cashier | `cashier@coffee.test` | Cashier |
+
+> **សុវត្ថិភាព**: ប្ដូរ password ភ្លាមៗបន្ទាប់ពី deploy ទៅ production!
 
 ---
 
@@ -156,541 +201,658 @@ php artisan serve
 
 ---
 
-## ៣.១ តារាងទាំងអស់ (All 24 Table Groups)
+## ៣.១ តារាងទាំងអស់ (All 75 Business Tables)
 
-តារាងត្រូវបានបង្កើតក្នុង file `database/migrations/2026_04_29_000000_create_student_profile_system_all_tables.php`:
+តារាងត្រូវបានបង្កើតក្នុង file `database/migrations/2026_05_13_000000_create_coffee_shop_pos_all_tables.php`។
 
-| # | Group | Tables | គោលបំណង |
+| # | ក្រុម (Group) | តារាង | គោលបំណង |
 |---|---|---|---|
-| 0 | **Branches** | `branches` | សាខាសាលា (multi-campus) |
-| 1 | **Auth** | `roles`, `users`, `permissions`, `role_user`, `permission_role`, `permission_user`, `branch_user` | ប្រព័ន្ធសិទ្ធិ និងអ្នកប្រើ |
-| 2 | **Locations** | `provinces`, `districts`, `communes`, `villages`, `addresses` | ទីតាំងភូមិសាស្ត្រកម្ពុជា |
-| 3 | **Basic Data** | `genders` | ភេទ |
-| 4 | **Staff** | `staff` | បុគ្គលិក និងគ្រូបង្រៀន |
-| 5 | **Students** | `students` | ព័ត៌មានសិស្ស |
-| 6 | **Guardians** | `guardians`, `student_guardians` | ព័ត៌មានឪពុកម្ដាយ/អាណាព្យាបាល |
-| 7 | **Academic** | `courses`, `levels`, `academic_years`, `shifts` | វគ្គសិក្សា ថ្នាក់ ឆ្នាំសិក្សា វេន |
-| 8 | **Buildings** | `buildings`, `rooms` | អគារ និងបន្ទប់ (រួមទាំង dormitory) |
-| 9 | **Classes** | `classes`, `class_schedules`, `enrollments` | ថ្នាក់រៀន កាលវិភាគ ការចុះឈ្មោះ |
-| 10 | **Room Assignments** | `student_room_assignments` | ការចាត់បន្ទប់ស្នាក់នៅ |
-| 11 | **Files** | `student_files` | ឯកសារ និងរូបភាពសិស្ស |
-| 12 | **Print Templates** | `print_templates` | ពុម្ពកាត វិញ្ញាបនបត្រ សញ្ញាបត្រ |
-| 13 | **Student Cards** | `student_cards` | កាតសិស្ស |
-| 14 | **Certificates** | `student_certificates` | វិញ្ញាបនបត្រ |
-| 15 | **Diplomas** | `student_diplomas` | សញ្ញាបត្រ |
-| 16 | **Fees** | `fee_types`, `student_invoices`, `student_invoice_items`, `payments` | ប្រភេទថ្លៃ វិក្កយបត្រ ការទូទាត់ |
-| 17 | **Update Requests** | `student_update_requests` | សំណើកែប្រែព័ត៌មានសិស្ស |
-| 18 | **Print Logs** | `print_logs` | កំណត់ត្រាការបោះពុម្ព |
-| 19 | **Report Logs** | `report_logs` | កំណត់ត្រារបាយការណ៍ |
-| 20 | **Export Logs** | `export_logs` | កំណត់ត្រានាំចេញទិន្នន័យ |
-| 21 | **Audit Logs** | `audit_logs` | កំណត់ត្រាសកម្មភាពអ្នកប្រើ |
-| 22 | **File Protection** | `file_protection_rules`, `file_access_logs` | ការការពារឯកសារ |
-| 23 | **Branch Settings** | `branch_settings` | ការកំណត់សាខា (ឈ្មោះសាលា ឡូហ្គូ ហត្ថលេខា) |
-| 24 | **Attendances** | `attendances` | វត្តមានសិស្ស និងបុគ្គលិក |
+| 1 | **Tenant & Branches** | `companies`, `branches`, `warehouses`, `branch_user` | Multi-tenant root + sub-branches |
+| 2 | **RBAC** | `roles`, `permissions`, `permission_role`, `users` | Manual role/permission system |
+| 3 | **POS Locations** | `pos_counters`, `kitchen_stations`, `table_floors`, `table_zones`, `dining_tables` | Physical POS / kitchen / table layout |
+| 4 | **Menu Catalog** | `menu_categories`, `menu_items`, `menu_sizes`, `menu_options`, `menu_addons`, `menu_item_size_prices`, `menu_item_options`, `menu_item_addons`, `menu_item_branches` | Menu structure + per-branch availability |
+| 5 | **Inventory Master** | `suppliers`, `ingredient_categories`, `units`, `ingredients`, `recipes`, `recipe_items` | Ingredient master + costing |
+| 6 | **Inventory Ledger** | `purchases`, `purchase_items`, `stock_batches`, `stock_balances`, `stock_movements`, `stock_adjustments`, `stock_transfers`, `stock_transfer_items`, `waste_records`, `stock_alerts`, `supplier_payments` | Stock movements + balances (centralized through `StockService`) |
+| 7 | **Customers & Loyalty** | `customers`, `membership_levels`, `loyalty_point_transactions` | Customer profiles + tiered loyalty |
+| 8 | **Promotions** | `promotions`, `promotion_branches`, `promotion_menu_items`, `promotion_menu_categories`, `coupons`, `coupon_redemptions` | Discounts + coupon codes |
+| 9 | **Sales / POS** | `cashier_shifts`, `payment_methods`, `orders`, `order_items`, `order_item_modifiers`, `kitchen_orders`, `kitchen_order_items` | Open shift → take orders → push to kitchen |
+| 10 | **Invoicing & Payments** | `sale_invoices`, `payments`, `invoice_voids` | Invoice + payment + void log |
+| 11 | **Online & Delivery** | `online_orders`, `delivery_orders` | Online channel + delivery tracking |
+| 12 | **Expenses** | `expense_categories`, `expenses` | Operating expenses |
+| 13 | **HR** | `staff`, `staff_schedules`, `payrolls`, `commissions` | Staff master + scheduling + payroll + commission |
+| 14 | **Tax & Settings** | `tax_rates`, `system_settings`, `code_sequences` | Tax + key/value settings + auto-numbering |
+| 15 | **Notifications** | `notification_templates`, `notifications` | Template + dispatched notifications |
+| 16 | **System / Audit** | `audit_logs`, `login_histories`, `report_exports`, `database_backups` | Read-only system viewers |
 
-## ៣.២ Relationship Diagram (រូបភាពទំនាក់ទំនង)
+## ៣.២ ខ្នាតស្តង់ដារ (Schema Conventions)
+
+ការប្រកាន់ខ្ជាប់ស្តង់ដារនេះត្រូវបានរក្សាក្នុង migration:
+
+- `id` — auto-increment primary key
+- `company_id` — multi-tenant scope (NOT NULL on every business table)
+- `branch_id` — branch scope (nullable on company-level data eg. roles/permissions)
+- `is_active` — boolean visibility flag
+- `created_at` / `updated_at` — Laravel timestamps
+- `deleted_at` — SoftDeletes where appropriate
+- Money columns — `decimal(12,4)` (or `(14,4)` for `stock_value`)
+- Quantities — `decimal(14,4)`
+- Enum status columns — explicit string enums (e.g. `status: draft|ordered|received|cancelled`)
+
+## ៣.៣ Relationship Diagram (រូបភាពទំនាក់ទំនង — សង្ខេប)
 
 ```
-Branch (1)
-├── Users (N)
-├── Staff (N)
-├── Students (N)
-│   ├── Guardians (M via student_guardians)
-│   ├── Enrollments (N)
-│   │   └── Classes (N)
-│   ├── StudentCards (N)
-│   ├── StudentCertificates (N)
-│   ├── StudentDiplomas (N)
-│   ├── StudentFiles (N)
-│   ├── StudentInvoices (N)
-│   │   ├── StudentInvoiceItems (N)
-│   │   └── Payments (N)
-│   └── StudentRoomAssignments (N)
-│       └── Rooms (N)
-│           └── Buildings (N)
-├── AcademicYears (N)
-├── Classes (N)
-│   ├── Courses (N)
-│   │   └── Levels (N)
-│   ├── Shifts (N)
-│   └── ClassSchedules (N)
-└── BranchSettings (1)
+Company (1)
+├── Branches (N)
+│   ├── Warehouses (N)
+│   ├── PosCounters (N)
+│   ├── KitchenStations (N)
+│   ├── TableFloors / TableZones / DiningTables (N)
+│   ├── CashierShifts (N)
+│   │   └── Orders (N) ──► SaleInvoices (1) ──► Payments (N)
+│   └── Staff (N) ──► StaffSchedules / Payrolls / Commissions (N)
+├── MenuCategories (N) ──► MenuItems (N) ──► MenuItemSizePrices/Options/Addons (M)
+├── Ingredients (N) ──► Recipes (N) ──► RecipeItems (N)
+├── Purchases (N) ──► PurchaseItems (N) ──► [StockService::record]
+│                                              ├── StockMovements
+│                                              ├── StockBalances (weighted avg)
+│                                              └── StockBatches
+├── Customers (N) ──► LoyaltyPointTransactions (N)
+├── Promotions (N) ── M:N ── MenuItems / MenuCategories / Branches
+└── Roles (N) ── M:N ── Permissions / Users
 ```
 
 ---
 
-> **ជំពូកទី ៤ — ម៉ូឌុល និងមុខងារទាំងអស់**
+> **ជំពូកទី ៤ — ម៉ូឌុល និងមុខងារទាំងអស់ (All Modules & Features)**
 
 ---
 
-## ៤.១ Dashboard (ផ្ទាំងគ្រប់គ្រង)
+មាន **55** controllers ក្រោម `/admin` prefix។ គ្រប់ module មាន Index page (Yajra DataTable) + Form page (create/edit) + show page (បើចាំបាច់) + manual permission check។
 
-**URL**: `/dashboard`
+## ៤.១ Dashboard
 
-បង្ហាញស្ថិតិសង្ខេប:
-- ចំនួនសិស្សសរុប / សិស្សសកម្ម
-- ការចុះឈ្មោះដែលកំពុងសិក្សា
-- វគ្គសិក្សា និងថ្នាក់សកម្ម
-- វិក្កយបត្រដែលមិនទាន់បង់
-- ការទូទាត់សរុប
+| URL | `/admin` (alias `/admin/dashboard`) |
+|---|---|
+| ប្រភេទ | Read-only summary |
+| ឯកសារ | `app/Http/Controllers/Admin/DashboardController.php` |
+| Vue page | `resources/js/Pages/Admin/Dashboard.vue` |
 
-> **ចំណាំ**: Dashboard បង្ហាញតែទិន្នន័យសាខាដែលបានជ្រើសរើស (branch-scoped)។
+បង្ហាញ KPIs សង្ខេបដែលត្រូវ scope តាម company + active branch:
 
-## ៤.២ Branch Management (គ្រប់គ្រងសាខា)
+- ការលក់ថ្ងៃនេះ (Sales Today)
+- ការបញ្ជាទិញថ្ងៃនេះ (Orders Today)
+- Cashier Shifts ដែលកំពុងបើក (Open Shifts)
+- បញ្ជី Low Stock Alerts
 
-**URL**: `/admin/branches`
+## ៤.២ POS — ការលក់ (Sales Flow)
 
-- **Create**: បន្ថែមសាខាថ្មី (កូដ ឈ្មោះខ្មែរ/អង់គ្លេស អាសយដ្ឋាន ទូរសព្ទ ឡូហ្គូ)
-- **Switch**: ផ្លាស់ប្ដូរសាខាកំពុងប្រើ (session-based)
-- **Settings**: កំណត់ឈ្មោះសាលា ឡូហ្គូ ហត្ថលេខា ស្តាប់សាលា លេខទូរសព្ទ អ៊ីមែល
+| URL | `/admin/pos` |
+|---|---|
+| Controller | `PosController` |
+| Vue page | `Pages/Admin/Pos/Index.vue` |
 
-## ៤.៣ User Management (គ្រប់គ្រងអ្នកប្រើ)
+ដំណើរការ:
 
-**URL**: `/admin/users`
+1. **Open Cashier Shift** — `/admin/cashier-shifts` (action: open, opens with starting cash float)
+2. **Take Order** — នៅទំព័រ POS, ជ្រើស menu items + sizes + options + addons + qty
+3. **Submit Order** — POST ទៅ `/admin/orders` (writes `orders` + `order_items` + auto `kitchen_orders` to relevant `kitchen_stations`)
+4. **Generate Invoice** — `/admin/sale-invoices` (POST writes `sale_invoices` from `orders`, calculates `subtotal`, `tax`, `grand_total`)
+5. **Take Payment** — POST `/admin/payments` (writes `payments` row(s), supports split tender; updates `sale_invoice.balance_due`)
+6. **Close Cashier Shift** — action: close (records ending cash, reconciles `expected_cash` = open float + cash sales − refunds)
 
-- បង្កើត / កែ / លុបអ្នកប្រើ
-- កំណត់ Role និង Permission
-- កំណត់សាខា (branch assignment)
+### Permission keys សំខាន់ៗ
 
-## ៤.៤ Roles & Permissions (សិទ្ធិ)
+| Permission | Action |
+|---|---|
+| `pos.use` | Access POS page |
+| `cashier_shifts.open` / `.close` | Open/close shift |
+| `orders.create` / `.void` | Place / void orders |
+| `sale_invoices.create` / `.void` | Invoice + void invoice |
 
-**URLs**: `/admin/roles`, `/admin/permissions`
+## ៤.៣ Menu Module
 
-ប្រព័ន្ធសិទ្ធិមាន ៣ កម្រិត:
-1. **Role** (ឧ. Admin, Manager, Receptionist, Teacher, Accountant)
-2. **Permission** (ឧ. `students.view`, `students.create`, `students.edit`, `students.delete`)
-3. **Permission per User** (override ជារបស់គណនី)
+| URL | Controllers |
+|---|---|
+| `/admin/menu-categories` | `MenuCategoriesController` |
+| `/admin/menu-items` | `MenuItemsController` (+ pivot: sizes prices, options, addons, branch availability) |
+| `/admin/menu-sizes` | `MenuSizesController` |
+| `/admin/menu-options` | `MenuOptionsController` |
+| `/admin/menu-addons` | `MenuAddonsController` |
 
-## ៤.៥ Student Management (គ្រប់គ្រងសិស្ស)
+ការបង្កើត Menu Item មួយ ត្រូវកំណត់:
+- Category
+- Sizes ច្រើនជាមួយ per-size price (writes `menu_item_size_prices`)
+- Options (ឧ. iced / hot)
+- Addons (ឧ. extra shot, syrup)
+- Branch availability (`menu_item_branches`) — ដើម្បីបង្ហាញតែនៅសាខាដែលអនុញ្ញាត
 
-**URL**: `/admin/students`
+## ៤.៤ Stock Module — ផ្នែកសំខាន់បំផុត
 
-ព័ត៌មានសិស្សរួមមាន:
-- **បញ្ជីសិស្ស**: DataTable មាន Search, Filter, Export
-- **បង្កើតសិស្ស**: បំពេញកូដសិស្ស ឈ្មោះខ្មែរ/ឡាតាំង ភេទ ថ្ងៃកំណើត ទីកន្លែងកំណើត អាសយដ្ឋានបច្ចុប្បន្ន ទូរសព្ទ អ៊ីមែល រូបថត
-- **មើលលំអិត**: Profile សិស្សពេញលេញ
-- **កែសម្រួល**: Update ព័ត៌មានណាមួយ
-- **Soft Delete**: លុបបណ្ដោះអាសន្ន (recoverable)
+ផ្នែកនេះ ប្រើ **`StockService`** (មើល §៥) ដែលជា centralized ledger។ មុខងាររបស់ Stock module:
 
-### Sub-features per Student:
-
-| Feature | URL Pattern | គោលបំណង |
+| Module | URL | រូបមន្ត |
 |---|---|---|
-| Files | `/admin/students/{id}/files` | Upload រូបភាព ឯកសារ (ប្រភេទ: photo, birth_certificate, id_card, certificate, diploma, document) |
-| Room Assignments | `/admin/students/{id}/room-assignments` | ចាត់បន្ទប់ស្នាក់នៅ និង Check-in/Check-out |
-| Cards | `/admin/students/{id}/cards` | បង្កើត/កែ/បោះពុម្ពកាតសិស្ស |
-| Certificates | `/admin/students/{id}/certificates` | បង្កើត/កែ/បោះពុម្ពវិញ្ញាបនបត្រ |
-| Diplomas | `/admin/students/{id}/diplomas` | បង្កើត/កែ/បោះពុម្ពសញ្ញាបត្រ |
-| Update Requests | `/admin/students/{id}/update-requests` | សំណើកែប្រែព័ត៌មាន |
+| Ingredients | `/admin/ingredients` | Ingredient master + ingredient categories |
+| Units | `/admin/units` | មាត្រា (g, ml, pc, …) — base + conversion factor |
+| Suppliers | `/admin/suppliers` | Supplier master + contact info |
+| **Purchases** | `/admin/purchases` | កុំទិញវត្ថុធាតុដើម។ ត្រូវ select supplier + warehouse + items, save with `status=received` ⇒ writes `stock_movements`, `stock_balances`, `stock_batches`, calculates `grand_total = subtotal + tax + shipping − discount` |
+| **Stock Transfers** | `/admin/stock-transfers` | ផ្ទេរ stock ពី warehouse មួយទៅមួយ (writes 2× `stock_movements` — out at source, in at destination) |
+| **Stock Adjustments** | `/admin/stock-adjustments` | កែប្រែ qty (loss, found, recount) — writes `stock_movements` with `movement_type=adjustment` |
+| **Waste Records** | `/admin/waste-records` | ការខាតបង់ (expired / damaged) — writes negative `stock_movements` |
+| **Recipes** | `/admin/recipes` | Auto-calculated `estimated_cost = SUM(recipe_items.qty × ingredient.cost_per_unit)` |
+| **Stock Alerts** | `/admin/stock-alerts` (read-only) | បង្ហាញ ingredients ដែលនៅ ≤ reorder level + acknowledge action |
 
-## ៤.៦ Guardian Management (គ្រប់គ្រងឪពុកម្ដាយ)
+### អ្នកមិនអាចកែ `stock_movements` ដោយផ្ទាល់!
 
-**URL**: `/admin/guardians`
+`stock_movements`, `stock_balances`, `stock_batches` ត្រូវសរសេរបានតែតាមរយៈ `StockService` ប៉ុណ្ណោះ — មិនមាន CRUD UI ដោយផ្ទាល់ទេ។ មាន**ការមើល (read-only viewer)** ប៉ុណ្ណោះ ដោយសារ business invariants ដូចជា `balance_after = sum(in − out)` ត្រូវរក្សា។
 
-- បង្កើតអាណាព្យាបាលថ្មី
-- ភ្ជាប់ទៅនឹងសិស្ស (relationship: father, mother, guardian, etc.)
-- កំណត់ **Primary Guardian** (is_primary = true) — នឹងបង្ហាញលើកាតសិស្ស
+## ៤.៥ POS Locations (Counters / Stations / Tables)
 
-## ៤.៧ Academic Setup (ការកំណត់វិទ្យាស្ថាន)
+| Module | URL |
+|---|---|
+| POS Counters | `/admin/pos-counters` |
+| Kitchen Stations | `/admin/kitchen-stations` |
+| Table Floors | `/admin/table-floors` |
+| Table Zones | `/admin/table-zones` |
+| Dining Tables | `/admin/dining-tables` |
 
-### Courses (វគ្គសិក្សា)
-**URL**: `/admin/courses`
-- ឈ្មោះវគ្គ ការពិពណ៌នា ស្ថានភាព
-- **Levels** (ថ្នាក់): ភ្ជាប់ទៅ Course (ឧ. វគ្គ IT → Level 1, Level 2, Level 3)
+កំណត់ការទាក់ទាញរូបវិទ្យានៃកន្លែងលក់ + ផ្ទះបាយ + តុ — នៅ POS time, cashier ជ្រើស counter + dining table ហើយ orders ត្រូវ route ទៅ kitchen station ត្រឹមត្រូវ។
 
-### Academic Years (ឆ្នាំសិក្សា)
-**URL**: `/admin/academic-years`
-- ឈ្មោះឆ្នាំ ថ្ងៃចាប់ផ្ដើម ថ្ងៃបញ្ចប់
-- កំណត់ **Current Year** (is_current = true)
+## ៤.៦ Customer & Loyalty
 
-### Shifts (វេន)
-**URL**: `/admin/shifts`
-- ឈ្មោះវេន ម៉ោងចាប់ផ្ដើម ម៉ោងបញ្ចប់ (ឧ. Morning 8:00-11:00, Afternoon 13:00-16:00)
+| Module | URL |
+|---|---|
+| Customers | `/admin/customers` |
+| Membership Levels | `/admin/membership-levels` |
+| Loyalty Points | `/admin/loyalty-point-transactions` (read-only viewer) |
 
-## ៤.៨ Class Management (គ្រប់គ្រងថ្នាក់)
+លំនាំការងារ:
+- បង្កើត Membership Levels (Bronze / Silver / Gold) ជាមួយ `discount_percent` និង `points_per_dollar`
+- Customers មាន `current_membership_level_id` + `total_points`
+- នៅ POS time អ្នកអាច attach customer ទៅ order ⇒ system auto issue `loyalty_point_transactions` (earn) និងពេលប្រើ points វា auto issue redemption
 
-**URL**: `/admin/classes`
+## ៤.៧ Promotions & Coupons
 
-- **Class Code**: កូដថ្នាក់ (ឧ. IT-L1-MOR-2026)
-- **Course & Level**: ភ្ជាប់ទៅវគ្គ និងថ្នាក់
-- **Academic Year & Shift**: ភ្ជាប់ឆ្នាំសិក្សា និងវេន
-- **Teacher**: ជ្រើសរើសពី Staff
-- **Room**: បន្ទប់រៀន
-- **Schedules**: កាលវិភាគប្រចាំសប្ដាហ៍ (ថ្ងៃ ម៉ោងចាប់ផ្ដើម-បញ្ចប់)
+| Module | URL |
+|---|---|
+| Promotions | `/admin/promotions` (link ទៅ branches + menu items + categories) |
+| Coupons | `/admin/coupons` |
 
-## ៤.៩ Enrollment (ការចុះឈ្មោះ)
+Promotions អាច scope តាម:
+- Branch (`promotion_branches`)
+- Menu Item (`promotion_menu_items`)
+- Menu Category (`promotion_menu_categories`)
+- Time range (`starts_at`, `ends_at`)
+- Type: `percent` / `fixed_amount` / `buy_x_get_y`
 
-**URL**: `/admin/enrollments`
+Coupons ត្រូវកំណត់ `code`, `discount_value`, `usage_limit`, `expires_at` — ការប្រើនីមួយៗត្រូវកត់ត្រាក្នុង `coupon_redemptions`។
 
-- ចុះឈ្មោះសិស្សចូលថ្នាក់
-- **Status**: studying, completed, dropped, transferred
-- **Study Time Label**: សម្គាល់ពេលវេលាសិក្សា
-- បង្ហាញប្រវត្តិចុះឈ្មោះទាំងអស់របស់សិស្ស
+## ៤.៨ Online & Delivery Orders
 
-## ៤.១០ Attendance (វត្តមាន)
+| Module | URL |
+|---|---|
+| Online Orders | `/admin/online-orders` |
+| Delivery Orders | `/admin/delivery-orders` |
 
-**URL**: `/admin/attendances`
+`online_orders` representsការបញ្ជាតាមឆានែល external (Facebook, Telegram, website) — នៅពេល confirm វា auto-link ទៅ `orders` table។ `delivery_orders` track delivery status (`pending`, `assigned`, `picked_up`, `delivered`, `failed`)។
 
-- បំពេញវត្តមានប្រចាំថ្ងៃ (បុគ្គលិក ឬសិស្ស)
-- **Status**: present, absent, late, excused
-- **Check-in / Check-out time**
-- Bulk Entry: បំពេញវត្តមានច្រើននាក់ក្នុងថ្នាក់តែម្ដង
+## ៤.៩ HR Module
 
-## ៤.១១ Fee Management (គ្រប់គ្រងថ្លៃ)
-
-### Fee Types (ប្រភេទថ្លៃ)
-**URL**: `/admin/fees/types`
-- ឈ្មោះប្រភេទថ្លៃ (ឧ. ថ្លៃសិក្សា, ថ្លៃសៀវភៅ, ថ្លៃប្រឡង) និងចំនួនទឹកប្រាក់
-
-### Invoices (វិក្កយបត្រ)
-**URL**: `/admin/fees/invoices`
-- បង្កើតវិក្កយបត្រសម្រាប់សិស្ស
-- បន្ថែមធាតុ (items) ពី Fee Types
-- **Status**: unpaid, partial, paid, cancelled
-- គណនាតុល្យភាព (Balance) ដោយស្វ័យប្រវត្តិ
-
-### Payments (ការទូទាត់)
-**URL**: `/admin/fees/payments`
-- ទទួលការទូទាត់ពីសិស្ស
-- **Method**: cash, bank, ABA, Wing, other
-- ភ្ជាប់ទៅ Invoice (optional)
-- គណនាតុល្យភាពវិក្កយបត្រដោយស្វ័យប្រវត្តិ
-
-## ៤.១២ Room & Building (អគារ និងបន្ទប់)
-
-**URL**: `/admin/rooms`
-
-- **Buildings**: អគារថ្មី (ឈ្មោះ អាសយដ្ឋាន)
-- **Rooms**: បន្ទប់ (លេខ ប្រភេទ: single/double/shared/classroom, ចំណុះ, តម្លៃប្រចាំខែ)
-- **Status**: available, full, maintenance, inactive
-
-## ៤.១៣ Print System (ប្រព័ន្ធបោះពុម្ព)
-
-### Print Templates (ពុម្ពបោះពុម្ព)
-**URL**: `/admin/print-templates`
-
-ប្រព័ន្ធពុម្ពអាចកែប្រែបានទាំងស្រុង:
-- **Template Types**: student_card, certificate, diploma
-- **HTML Template**: កែ HTML structure
-- **CSS Template**: កែ styling
-- **Settings**: JSON config បន្ថែម
-- **Default Template**: កំណត់ពុម្ពដើម្បីប្រើដោយស្វ័យប្រវត្តិ
-
-### Student Cards (កាតសិស្ស)
-**URL**: `/admin/student-cards`
-
-- បង្ហាញកាតទាំងអស់ក្នុងប្រព័ន្ធ
-- **Bulk Print**: ជ្រើសរើសច្រើនកាត → Print ព្រមគ្នា (4 កាត/ទំព័រ A4)
-- **Single Print**: Print កាតតែមួយ (ទំហំពេញ A4 landscape)
-- **Card Layout** (បច្ចុប្បន្ន): Header ពណ៌ខៀវ `#0000ff` + ឈ្មោះសាលា រាងកោងក្រហមតាមរយៈ SVG រូបថត និងព័ត៌មានសិស្ស
-
-### Certificates & Diplomas
-**URL**: `/admin/student-certificates`, `/admin/student-diplomas`
-
-- **Workflow**: Draft → Approved → Printed → Cancelled
-- **Approval**: អ្នកមានសិទ្ធិ approve ទើបបោះពុម្ពបាន
-- **Print Log**: កត់ត្រាចំនួនការបោះពុម្ព
-
-## ៤.១៤ Reports (របាយការណ៍)
-
-**URL**: `/admin/reports`
-
-របាយការណ៍ដែលមាន:
-1. **Student Report** — បញ្ជីសិស្សតាមលក្ខខណ្ឌ
-2. **New Admissions** — សិស្សចុះឈ្មោះថ្មី
-3. **Class Roster** — បញ្ជីសិស្សតាមថ្នាក់
-4. **Monthly Attendance** — វត្តមានប្រចាំខែ
-5. **Daily Cash Receipts** — ទទួលលុយប្រចាំថ្ងៃ
-6. **AR Aging** — វិក្កយបត្រដែលនៅជំពាក់
-7. **Revenue Report** — ចំណូលសរុប
-8. **Fee Statement** — របាយការណ៍ថ្លៃសិក្សា
-
-**Export Formats**: PDF, Excel, CSV, Print, View
-
-## ៤.១៥ Logs & Auditing (កំណត់ត្រា)
-
-| Log Type | URL | គោលបំណង |
+| Module | URL | Auto-calc |
 |---|---|---|
-| Audit Logs | `/admin/audit-logs` | កត់ត្រាសកម្មភាពទាំងអស់ (create, update, delete) |
-| Report Logs | `/admin/report-logs` | កត់ត្រាការបង្កើតរបាយការណ៍ |
-| Export Logs | `/admin/export-logs` | កត់ត្រាការនាំចេញទិន្នន័យ |
-| Print Logs | `/admin/print-logs` | កត់ត្រាការបោះពុម្ព |
-| File Access Logs | `/admin/file-access-logs` | កត់ត្រាការចូលមើលឯកសារ |
+| Staff | `/admin/staff` | — |
+| Staff Schedules | `/admin/staff-schedules` | — |
+| **Payrolls** | `/admin/payrolls` | `net_salary = basic + commission + bonus − deduction` (calculated both in Vue form + backend on save) |
+| **Commissions** | `/admin/commissions` | `commission_amount = base_amount × rate / 100` (for percent type) ឬ ប្រើ fixed amount |
 
-## ៤.១៦ File Protection (ការពារឯកសារ)
+## ៤.១០ Expenses
 
-**URL**: `/admin/file-protection-rules`
+| Module | URL |
+|---|---|
+| Expense Categories | `/admin/expense-categories` |
+| Expenses | `/admin/expenses` |
 
-កំណត់តាម Role:
-- Allow Download? (បើក/បិទ)
-- Allow Print? (បើក/បិទ)
-- Allow Export? (បើក/បិទ)
-- Watermark? (បើក/បិទ)
+កត់ត្រាការចំណាយ (rent, utilities, supplies) ដោយ category, attach receipt, link ទៅ branch។
 
----
+## ៤.១១ Settings & Reports
 
-> **ជំពូកទី ៥ — ការប្រើប្រាស់ប្រចាំថ្ងៃ (Daily Workflow)**
+| Module | URL |
+|---|---|
+| Payment Methods | `/admin/payment-methods` |
+| Tax Rates | `/admin/tax-rates` (percent ឬ fixed; can apply per item, per order, or both) |
+| System Settings | `/admin/settings` (key/value JSON store) |
+| Notification Templates | `/admin/notification-templates` |
+| Code Sequences | `/admin/code-sequences` (auto-numbering: invoices, orders, purchases, transfers, …) |
+| Reports — Sales | `/admin/reports/sales` |
+| Reports — Inventory | `/admin/reports/inventory` |
+| Reports — Expenses | `/admin/reports/expenses` |
 
----
+## ៤.១២ System Viewers (Read-only)
 
-## ៥.១ វិធីប្រើប្រាស់មូលដ្ឋាន
+ផ្ទាំងមើលប្រវត្តិសារ — នៅក្នុង sidebar group **"System"**:
 
-### ជំហានដំបូងប្រចាំថ្ងៃ
-
-1. **Login** ចូប្រព័ន្ធ
-2. **ជ្រើសរើសសាខា** (Branch Switcher នៅខាងលើអេក្រង់)
-3. **ពិនិត្យ Dashboard** សម្រាប់ស្ថិតិសង្ខេប
-
-### ការចុះឈ្មោះសិស្សថ្មី
-
-```
-Students → Create New
-  ├─ បំពេញព័ត៌មានផ្ទាល់ខ្លួន
-  ├─ បំពេញអាសយដ្ឋាន (ខេត្ត → ស្រុក → ឃុំ → ភូមិ)
-  ├─ Upload រូបថត
-  ├─ ភ្ជាប់ Guardian (father/mother/guardian)
-  └─ បង្កើត Card (បើាត្រូវការ)
-      └─ Print Card
-```
-
-### ការចុះឈ្មោះចូលថ្នាក់
-
-```
-Enrollments → Create
-  ├─ ជ្រើសរើសសិស្ស
-  ├─ ជ្រើសរើសថ្នាក់ (Class)
-  ├─ ជ្រើសរើសឆ្នាំសិក្សា
-  ├─ ជ្រើសរើសវេន (Shift)
-  └─ កំណត់ស្ថានភាព: studying
-```
-
-### ការបង់ថ្លៃសិក្សា
-
-```
-Fees → Invoices → Create
-  ├─ ជ្រើសរើសសិស្ស
-  ├─ បន្ថែម Items (ប្រភេទថ្លៃ + ចំនួន)
-  ├─ រក្សាទុក → Status: unpaid
-  │
-  └─ Payments → Create
-      ├─ ជ្រើសរើស Invoice
-      ├─ បំពេញចំនួនលុយ
-      ├─ ជ្រើស Method (cash/bank/ABA/Wing)
-      └─ Save → តុល្យភាពវិក្កយបត្រត្រូវបាន update ដោយស្វ័យប្រវត្តិ
-```
-
-### ការបោះពុម្ពកាតសិស្ស
-
-```
-Students → [សិស្ស] → Cards
-  ├─ Create Card → បំពេញថ្ងៃចេញ និងថ្ងៃផុតកំណត់
-  └─ Print → បោះពុម្ពកាតតែមួយ (A4 landscape)
-
-ឬ
-
-Student Cards → ជ្រើសរើសច្រើនកាត → Bulk Print → Print ព្រមគ្នា (4 កាត/ទំព័រ)
-```
+| Module | URL | កម្រិត |
+|---|---|---|
+| Audit Logs | `/admin/audit-logs` | View |
+| Login Histories | `/admin/login-histories` | View |
+| Stock Alerts | `/admin/stock-alerts` | View + Acknowledge |
+| Loyalty Points | `/admin/loyalty-point-transactions` | View |
+| Notifications | `/admin/notifications` | View |
+| Database Backups | `/admin/database-backups` | View |
+| Report Exports | `/admin/report-exports` | View |
 
 ---
 
-> **ជំពូកទី ៦ — ការគ្រប់គ្រងប្រព័ន្ធ (System Administration)**
+> **ជំពូកទី ៥ — StockService (ផ្នែកស្នូលនៃ Inventory)**
 
 ---
 
-## ៦.១ ការប្ដូរឈ្មោះសាលា និងឡូហ្គូ (Brand Configuration)
+ឯកសារ: `app/Services/StockService.php`
 
-មានពីររបៀប:
+`StockService` គឺជា **ledger តែមួយ** សម្រាប់ការផ្លាស់ប្ដូរ stock ទាំងអស់។ មិនមាន controller ណាមួយ touch `stock_movements`, `stock_balances`, `stock_batches` ដោយផ្ទាល់ — ទាំងអស់ត្រូវឆ្លងកាត់សេវានេះ។
 
-### របៀបទី ១ — Branch Settings (សម្រាប់គ្រប់សាខា)
+## ៥.១ Method សំខាន់
 
-```
-Branches → [សាខា] → Settings
-```
-
-បំពេញ:
-- School Name (Khmer / English)
-- Logo path
-- Stamp path
-- Signature path
-- Address, Phone, Email, Website
-
-### របៀបទី ២ — Environment File (Global)
-
-```env
-# .env
-APP_NAME="SITS Information Technology School"
-APP_NAME_KH="សាលាបច្ចេកវិទ្យាព័ត៌មាន អេស អាយ ធី អេស"
-APP_NAME_EN="SITS INFORMATION TECHNOLOGY SCHOOL"
+```php
+StockService::record(
+    company_id: int,
+    branch_id: int,
+    warehouse_id: int,
+    ingredient_id: int,
+    quantity_in: float,        // positive for inbound (purchase, transfer-in, found)
+    quantity_out: float,       // positive for outbound (sale, transfer-out, waste)
+    unit_cost: float,
+    movement_type: string,     // purchase_in | transfer_in | transfer_out | adjustment | waste | sale | recipe_consume
+    reference_type: string,    // App\Models\Purchase, StockTransfer, …
+    reference_id: int,
+    batch_no?: string,
+    expiry_date?: Carbon
+): StockMovement
 ```
 
-## ៦.២ ការប្ដូរពុម្ពកាត (Customizing Card Template)
+ការបង្កើតរបស់ method នេះ atomic (transaction):
 
-```
-Print Templates → Create / Edit
-  ├─ Name: Default Student Card
-  ├─ Type: student_card
-  ├─ HTML Template: កែ HTML structure
-  ├─ CSS Template: កែ styling
-  └─ Is Default: បើក → ពុម្ពនេះនឹងត្រូវប្រើដោយស្វ័យប្រវត្តិ
-```
+1. បង្កើត row ថ្មីក្នុង `stock_movements` ជាមួយ `balance_after = (current_balance + qty_in − qty_out)`
+2. Upsert row ក្នុង `stock_balances` (per ingredient + warehouse) ជាមួយ:
+   - `quantity_on_hand` — running total
+   - `weighted_avg_cost` — recalculated weighted average (purchase) ឬ unchanged (consume/transfer)
+   - `stock_value = quantity_on_hand × weighted_avg_cost`
+3. បើ batch_no ត្រូវផ្ដល់ — upsert row ក្នុង `stock_batches` (FIFO consumption)
 
-> **ចំណាំ**: HTML template ប្រើ `{{ $variable }}` syntax ដូច Blade template។
+## ៥.២ ការត្រួតពិនិត្យ (Verifying)
 
-## ៦.៣ ការបង្កើត Role ថ្មី
-
-```
-Roles → Create
-  ├─ Name: accountant
-  ├─ Display Name: Accountant
-  └─ Permissions: ជ្រើសសិទ្ធដែលត្រូវការ
-      (ឧ. invoices.view, invoices.create, payments.view, payments.create)
-```
-
-## ៦.៤ ការបង្កើត Permission ថ្មី
-
-```
-Permissions → Create
-  ├─ Name: reports.export
-  ├─ Module: reports
-  ├─ Display Name: Export Reports
-  └─ Description: អនុញ្ញាតឲ្យនាំចេញរបាយការណ៍
-```
-
----
-
-> **ជំពូកទី ៧ — ការថែទាំ និងការដោះស្រាយបញ្ហា**
-
----
-
-## ៧.១ Command សំខាន់ៗ (Artisan Commands)
+បន្ទាប់ពី save Purchase ដែលមាន `status=received`, run:
 
 ```bash
-# Clear caches (ប្រសិនបើមានបញ្ហា)
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-php artisan route:clear
-
-# Optimize (បន្ទាប់ពី deploy)
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# Database
-php artisan migrate                    # Run migrations
-php artisan migrate:fresh --seed       # Reset DB + seed
-php artisan db:seed --class=UsersSeeder # Seed specific seeder
-
-# Storage link (សម្រាប់ file uploads)
-php artisan storage:link
+php artisan tinker --execute='
+  echo App\Models\StockMovement::latest("id")->first()?->toJson() . PHP_EOL;
+  echo App\Models\StockBalance::latest("id")->first()?->toJson() . PHP_EOL;
+'
 ```
 
-## ៧.២ បញ្ហាដែលជួបប្រទះញឹកញាប់
+ការត្រួតពិនិត្យ:
+- `movement_type = "purchase_in"`
+- `quantity_in` = qty ក្នុង form
+- `unit_cost` = unit_cost ក្នុង form
+- `balance_after` = `stock_balance.quantity_on_hand`
+- `stock_value` = `quantity_on_hand × unit_cost` (or weighted_avg)
 
-| បញ្ហា | មូលហេតុ | ដំណោះស្រាយ |
+ប្រសិនបើ values មិនត្រឹមត្រូវ ⇒ `StockService::record` regressed។ មើល <ref_file file="/home/ubuntu/repos/coffee-shop-pos/app/Services/StockService.php" /> ដើម្បីបញ្ជាក់។
+
+---
+
+> **ជំពូកទី ៦ — Multi-tenancy & Branch Switching**
+
+---
+
+## ៦.១ Tenant Scoping
+
+គ្រប់ admin controller scoped queries តាម `company_id` ដែលដក់ចេញពី authenticated user។ មិនមាន global tenancy package — query scoping ត្រូវបានធ្វើដោយផ្ទាល់៖
+
+```php
+Order::query()
+    ->where('company_id', current_company_id())
+    ->where('branch_id', current_branch_id())   // optional
+```
+
+`current_company_id()` និង `current_branch_id()` ជា helper functions ក្នុង `app/Helpers/helpers.php`។
+
+## ៦.២ ការប្ដូរ Branch (Branch Switching)
+
+នៅ top-bar dropdown **"Main Branch"** អ្នកអាចជ្រើស branch មួយផ្សេង (ប្រសិនបើគណនីអ្នកត្រូវបាន assign ទៅ branch ច្រើនតាមរយៈ `branch_user` pivot)។
+
+- POST ទៅ `/branch/switch` (BranchSwitcherController)
+- Save ទៅ session key `active_branch_id`
+- Share ឡើង Vue តាមរយៈ Inertia shared prop `auth.branch`
+- Page reload-less — Inertia partial reload គ្រាន់តែ rehydrate `auth.branch` prop
+
+---
+
+> **ជំពូកទី ៧ — សិទ្ធិ និងតួនាទី (Roles & Permissions)**
+
+---
+
+ប្រព័ន្ធនេះ **មិនប្រើ Spatie/laravel-permission** — RBAC ត្រូវ implement ដោយផ្ទាល់ដើម្បីការគ្រប់គ្រងផ្ទាល់នៅលើ schema។
+
+## ៧.១ តារាងសំខាន់
+
+| តារាង | គោលបំណង |
+|---|---|
+| `roles` | Role definitions, scoped to company (or NULL = system role) |
+| `permissions` | Master list of permission keys (e.g. `orders.create`, `pos.use`) |
+| `permission_role` | M:N pivot — which roles have which permissions |
+| `users` | Each user has `role_id` reference |
+
+## ៧.២ មុខងារ Helper
+
+```php
+// In any controller/Blade/Vue (via Inertia auth.user.permissions)
+can_user('orders.create');
+$user->hasPermission('pos.use');
+```
+
+ការត្រួតពិនិត្យ Permission ក្នុង routes ត្រូវ wrap ដោយ **`CheckPermission`** middleware:
+
+```php
+Route::middleware(['auth', 'permission:orders.create'])
+    ->post('/admin/orders', [OrdersController::class, 'store']);
+```
+
+## ៧.៣ Default Roles
+
+| Role | Description | Permissions |
 |---|---|---|
-| **រូបថតមិនបង្ហាញ** | `storage:link` មិនបានធ្វើ | `php artisan storage:link` |
-| **ឡូហ្គូមិនបង្ហាញលើកាត** | គ្មាន `public/images/logo.png` | ដាក់រូបភាព logo ទៅ `public/images/logo.png` |
-| **សិស្សមិនបង្ហាញ** | Branch filter មិនត្រឹមត្រូវ | ពិនិត្យ Branch Switcher នៅខាងលើ |
-| **Permission denied** | Role មិនមានសិទ្ធិ | ពិនិត្យ Role និង Permission |
-| **DataTable error** | Database គ្មានទិន្នន័យ | `php artisan db:seed` |
-| **ទំព័រចុះពណ៌** | npm build មិនបានធ្វើ | `npm run build` |
+| **Super Admin** | System-wide, all permissions | All |
+| **Branch Manager** | Operations at branch level | Menu/Stock/Customers/POS/Reports + most CRUD |
+| **Cashier** | POS-only role | `pos.use`, `cashier_shifts.*`, `orders.*`, `payments.*` |
 
-## ៧.៣ Backup ទិន្នន័យ (Data Backup)
+Permission keys ត្រូវបានកំណត់ក្នុង `database/seeders/PermissionSeeder.php`។ មាន **~270 permissions** ឆ្លងកាត់ ~60 modules។
 
-### SQLite
+## ៧.៤ ការបន្ថែម Permission ថ្មី
+
+1. បន្ថែម entry ទៅ `PermissionSeeder::$modules`
+2. Run `php artisan db:seed --class=PermissionSeeder`
+3. Assign ទៅ roles តាមរយៈ Roles admin page
+
+---
+
+> **ជំពូកទី ៨ — KH/EN Language Switching**
+
+---
+
+## ៨.១ How It Works
+
+- **Server-side strings** ស្ថិតក្នុង `lang/en/coffee.php` និង `lang/kh/coffee.php` (~300 keys នីមួយៗ)
+- **Vue-side strings** ស្ថិតក្នុង `resources/js/lang/en.json` និង `resources/js/lang/kh.json` (mirror)
+- Active locale stored in session key `locale` + shared to Vue via Inertia prop `locale`
+- Vue `t(key)` helper resolves from `lang/<locale>.json`
+- Server `__()` Blade helper resolves from `lang/<locale>/coffee.php`
+
+## ៨.២ Switcher Flow
+
+1. Click top-right **EN ▾** dropdown → select Khmer
+2. POST ទៅ `/locale` with `locale=kh`
+3. Backend saves `session('locale')` + returns Inertia partial response
+4. Vue updates `t()` reactive bundle without full page reload
+5. Sidebar labels, page titles, page body all reactively re-translate
+
+## ៨.៣ Yajra Column Headers — Special Handling
+
+នៅ Yajra DataTables, column titles ត្រូវ resolved ម្ដងតែម៉ោង server time (`$columns = [...]`)។ ដើម្បីឲ្យ headers re-translate ដោយមិន reload:
+
+- Server sends **raw `coffee.xxx` keys** (មិន translate)
+- Vue `YajraTable` component calls `t(column.title)` reactively ⇒ re-translate ចំពោះ DOM ដោយផ្ទាល់
+
+## ៨.៤ ការបន្ថែម Translation Key ថ្មី
+
+1. បន្ថែម key ក្នុង `lang/en/coffee.php` + `lang/kh/coffee.php`
+2. Mirror ទៅ `resources/js/lang/en.json` + `resources/js/lang/kh.json`
+3. ប្រើជា `__('coffee.your_key')` (Blade) ឬ `t('coffee.your_key')` (Vue)
+
+## ៨.៥ Khmer Font Rendering
+
+ប្រសិនបើ Khmer glyphs បង្ហាញត្រឹមត្រូវ ⇒ ត្រូវដំឡើង Noto Sans Khmer font លើ server / browser:
+
 ```bash
-# Copy database file
-copy database\database.sqlite database\database_backup_YYYYMMDD.sqlite
-```
-
-### MySQL
-```bash
-mysqldump -u root -p student_profile_db > backup_YYYYMMDD.sql
+sudo apt-get install -y fonts-noto fonts-noto-color-emoji
 ```
 
 ---
 
-> **ជំពូកទី ៨ — សង្ខេប URL Routes**
+> **ជំពូកទី ៩ — Layout, Sidebar, Header**
 
 ---
 
-## តារាង URL សំខាន់ៗ
+## ៩.១ Custom Admin Layout
 
-| មុខងារ | URL | ទំព័រ |
+ឯកសារ: `resources/sass/admin-layout.scss`
+
+ប្រព័ន្ធ **មិនប្រើ Skodash theme** ទេ (ដែលជា theme ដែលផ្ដល់មកដំបូងតែខ្វះ assets)។ Layout ស្ថិតលើ Bootstrap 5 + custom SCSS។
+
+### Breakpoint Logic
+
+| Viewport | សិន្ទន | Toggle behaviour |
 |---|---|---|
-| ផ្ទាំងគ្រប់គ្រង | `/dashboard` | Dashboard |
-| សិស្ស | `/admin/students` | បញ្ជីសិស្ស |
-| បង្កើតសិស្ស | `/admin/students/create` | Form បង្កើត |
-| កាតសិស្សសកល | `/admin/student-cards` | Global card list |
-| Bulk Print | `/admin/student-cards/bulk-print` | Print ច្រើនកាត |
-| វិក្កយបត្រ | `/admin/fees/invoices` | បញ្ជីវិក្កយបត្រ |
-| ទូទាត់ | `/admin/fees/payments` | បញ្ជីការទូទាត់ |
-| របាយការណ៍ | `/admin/reports` | ផ្ទាំងរបាយការណ៍ |
-| អ្នកប្រើ | `/admin/users` | គ្រប់គ្រងអ្នកប្រើ |
-| សាខា | `/admin/branches` | គ្រប់គ្រងសាខា |
+| ≥ 992px (desktop) | `.wrapper.sidebar-collapsed` | Sidebar slides offscreen via `transform: translateX(-100%)`; content + header span full width |
+| < 992px (mobile) | `.wrapper.sidebar-open` | Sidebar opens as overlay with dim backdrop; backdrop click closes |
+
+Vue logic: `resources/js/Layouts/AdminLayout.vue`
+
+## ៩.២ Header Dropdowns
+
+នៅ top-bar មាន dropdowns ៣ (Branch / EN-KH / User), ស្ថិតក្នុង `Layouts/AdminLayout.vue`។ ស្តាយ៖
+
+- Small custom chevron (no Bootstrap default ▼)
+- Hover state: light grey
+- Active item: solid blue + bold
+- Menu container: rounded + drop shadow
+- User card: avatar + name + role
+
+## ៩.៣ Sidebar Accordion
+
+- Pure Vue-driven (no metismenu / external library)
+- Parent click: toggle expanded state
+- Active route auto-expand parent group
+- Sidebar order match migration table order (POS top → System bottom)
 
 ---
 
-> **ជំពូកទី ៩ — ការអភិវឌ្ឍបន្ត (Development Guide)**
+> **ជំពូកទី ១០ — Gotchas សំខាន់ៗ**
 
 ---
 
-## ៩.១ របៀបបន្ថែម Module ថ្មី
+## ១០.១ jQuery + DataTables MUST be classic CDN scripts
 
-ប្រសិនបើចង់បន្ថែមមុខងារថ្មី:
+ឯកសារ `resources/views/app.blade.php` ត្រូវ load jQuery + DataTables **before** `@vite` as classic `<script>` tags:
 
-1. **Create Migration**: បន្ថែម table ទៅ `database/migrations/...`
-2. **Create Model**: `php artisan make:model NewModel`
-3. **Create Controller**: `php artisan make:controller NewModelController`
-4. **Create Routes**: បន្ថែមទៅ `routes/web.php`
-5. **Create Views**: បង្កើត folder ក្នុង `resources/views/admin/...`
-6. **Add Permissions**: បន្ថែមទៅ `RolesPermissionsSeeder`
-7. **Seed Data**: បង្កើត Seeder បើាត្រូវការទិន្នន័យគំរូ
+```html
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+@vite(['resources/js/app.js'])
+```
 
-## ៩.២ គោលការសុវត្ថិភាព (Security)
+**WHY**: DataTables' UMD wrapper មាន `window = ...` / `document = ...` assignments នៅ top-level ដែល crash នៅក្នុង strict-mode ESM bundles (Vite)។ ប្រសិនបើនរណាម្នាក់ import វាតាមរយៈ Vite ⇒ ផ្ទាំង login នឹង render ទទេ។
 
-- **CSRF Protection**: Laravel Breeze មានរួចជាស្រេច
-- **Authorization**: `can:module.action` middleware គ្រប់ routes
-- **Password Hashing**: bcrypt hashing ដោយស្វ័យប្រវត្តិ
-- **Soft Deletes**: មិនលុបពិតប្រាកដ — recoverable
-- **Audit Trail**: គ្រប់ create/update/delete ត្រូវបានកត់ត្រា
+## ១០.២ Vite Build វាមាន Caching
+
+ប្រសិនបើ CSS/SCSS ប្រែប្រួល មិនបង្ហាញ ⇒ run:
+
+```bash
+rm -rf public/build
+npm run build
+```
+
+ឬ ប្រើ `npm run dev` ដែលមាន hot reload។
+
+## ១០.៣ Tom Select Dropdowns
+
+Tom Select wrapping a `<select>` តម្រូវអោយ click លើ wrapper មុនបើ dropdown — ការ type ចូលដោយផ្ទាល់នឹង filter ប៉ុណ្ណោះ មិន commit value ទេ។
+
+## ១០.៤ Khmer Font
+
+ប្រសិនបើ glyphs Khmer បង្ហាញខូច (subscripts stacking ខុស) ⇒ install Noto Sans Khmer:
+
+```bash
+sudo apt-get install -y fonts-noto fonts-noto-color-emoji
+```
+
+## ១០.៥ Demo Seeder ខ្វះ Fixtures
+
+ការ Seed default មិន create:
+- Sample ingredients with realistic costs
+- Sample suppliers
+- Sample staff
+
+ដើម្បីសាកល្បង modules ដែលត្រូវការ relations នេះ:
+
+```bash
+php artisan tinker --execute='
+  App\Models\Ingredient::firstOrCreate(["company_id"=>1,"name"=>"Arabica Beans"], ["unit_id"=>1,"is_active"=>1]);
+  App\Models\Supplier::firstOrCreate(["company_id"=>1,"name"=>"Acme Coffee Supplies"], ["is_active"=>1]);
+  App\Models\Staff::firstOrCreate(["company_id"=>1,"first_name"=>"Test","last_name"=>"Barista"], ["branch_id"=>1,"is_active"=>1]);
+  App\Models\Warehouse::firstOrCreate(["company_id"=>1,"warehouse_code"=>"WH-MAIN"], ["branch_id"=>1,"name"=>"Main Warehouse","is_active"=>1]);
+'
+```
 
 ---
 
-> **ជំពូកទី ១០ — ព័ត៌មានទំនាក់ទំនង**
+> **ជំពូកទី ១១ — Workflow ឆ្នាំ Operations**
 
 ---
 
-## ឯកសារយោង (References)
+## ១១.១ ការបើកហាងសម្រាប់ថ្ងៃនេះ (Open Day)
 
-- **Laravel Docs**: https://laravel.com/docs/12.x
-- **TailwindCSS**: https://tailwindcss.com/docs
-- **AlpineJS**: https://alpinejs.dev
-- **Yajra DataTables**: https://yajrabox.com/docs/laravel-datatables
+1. Login ជា Cashier ⇒ `/admin/cashier-shifts/open` ⇒ ដាក់ starting cash float
+2. Verify menu items active + stock ready (មើល `/admin/stock-alerts` បើ alerts ច្រើន ត្រូវ purchase មុន)
 
-## អ្នកអភិវឌ្ឍ (Developer Notes)
+## ១១.២ ការប្រតិបត្តិការ POS
 
-ប្រព័ន្ធនេះត្រូវបានបង្កើតឡើងសម្រាប់គ្រប់គ្រងព័ត៌មានសិស្សពេញលេញ ដោយប្រើ Laravel Framework ជំនាន់ចុងក្រោយ។ ប្រសិនបើមានសំណួរ ឬបញ្ហាណាមួយ សូមពិនិត្យ Log files ក្នុង `storage/logs/` ឬមើល Audit Logs នៅក្នុងប្រព័ន្ធ។
+1. Customer arrives ⇒ open `/admin/pos`
+2. ជ្រើស dining table (បើទាន់) + counter
+3. Click menu items, choose sizes + addons
+4. Submit ⇒ creates order + kitchen orders
+5. ការសម្រេច order ⇒ click "Generate Invoice" ⇒ POST payment
 
----
+## ១១.៣ End-of-Day
 
-**សង្ខេបការប្រើប្រាស់រហ័ស (Quick Start Checklist)**
+1. Print Z-Report (sales summary)
+2. Close cashier shift ⇒ ការប្រកាស ending cash
+3. ប្រព័ន្ធ compute variance = `expected − ending` + flag
+4. Reconcile stock alerts ⇒ schedule purchases for next day
 
-- [ ] Clone Project
-- [ ] `composer install`
-- [ ] `npm install && npm run build`
-- [ ] Copy `.env.example` → `.env`
-- [ ] `php artisan key:generate`
-- [ ] Create database file
-- [ ] `php artisan migrate`
-- [ ] `php artisan db:seed`
-- [ ] `php artisan storage:link`
-- [ ] Login with `admin@sits.edu.kh` / `password`
-- [ ] Switch to correct branch
-- [ ] Upload logo to `public/images/logo.png`
-- [ ] Ready to use!
+## ១១.៤ End-of-Month
+
+1. Run payroll calculation (mass) ⇒ `/admin/payrolls`
+2. Generate commission report
+3. Generate report exports (sales summary, inventory valuation, expense breakdown)
+4. Database backup ⇒ មើល `/admin/database-backups`
 
 ---
 
-*ឯកសារនេះត្រូវបានបង្កើតឡើងដោយស្វ័យប្រវត្តិពី Project Audit — ថ្ងៃទី ៥ ឧសភា ២០២៦*
+> **ជំពូកទី ១២ — សំណួរញឹកញាប់ (FAQ)**
+
+---
+
+| សំណួរ | ចម្លើយ |
+|---|---|
+| តើតារាង Stock Movements អាចកែប្រែបានទេ? | មិនបាន - ត្រូវឆ្លងកាត់ `StockService` ប៉ុណ្ណោះ |
+| តើ Cashier អាចបើក Shift ច្រើនជា ១ ក្នុងម៉ោងតែ មួយទេ? | មិនបាន — system ការពារដោយ business rule (one open shift per user) |
+| តើខ្ញុំអាច disable user ដោយមិន delete បានទេ? | បាន — set `is_active = false` |
+| តើ multi-branch user ត្រូវ assign យ៉ាងណា? | តាមរយៈ `branch_user` pivot នៅ `/admin/users` ⇒ checkbox |
+| តើ KH/EN switch ត្រូវ reload page ទេ? | មិនត្រូវ — Inertia partial reload តែ rehydrate locale prop |
+| តើ DataTable column headers រស់រវើកនៅពេលប្ដូរ language ទេ? | រស់ — server sends raw keys, Vue `t()` reactively translate |
+| ហេតុអ្វី login page render blank? | DataTables ត្រូវបាន import តាមរយៈ Vite — ត្រូវប្តូរទៅ CDN script (មើល §១០.១) |
+| តើ session timeout ប៉ុន្មាន? | Default Laravel — 120 minutes (`SESSION_LIFETIME` ក្នុង .env) |
+| តើខ្ញុំអាច export reports ទៅ PDF/Excel ទេ? | បាន — `/admin/report-exports` queue export jobs |
+| ហេតុអ្វី Sidebar មិនប្រែទំហំនៅពេល click hamburger? | មុនជួសជុលក្នុង PR #7 — បច្ចុប្បន្នវាគួរ slide offscreen ហើយ |
+
+---
+
+> **ជំពូកទី ១៣ — Commands សំខាន់ៗ**
+
+---
+
+```bash
+# Setup / Reset
+php artisan migrate:fresh --seed
+composer install
+npm install && npm run build
+
+# Dev
+php artisan serve --host=127.0.0.1 --port=8000
+npm run dev
+
+# Code Quality
+vendor/bin/pint                    # PHP formatter (apply)
+vendor/bin/pint --test             # PHP formatter (verify)
+
+# Permissions / Seeders
+php artisan db:seed --class=PermissionSeeder
+php artisan db:seed --class=SampleDataSeeder
+
+# Database utilities
+php artisan tinker
+php artisan migrate:status
+php artisan route:list | grep admin
+
+# Backup (writes to database_backups table)
+php artisan backup:run
+```
+
+---
+
+> **ជំពូកទី ១៤ — Reference**
+
+---
+
+## ១៤.១ Routes summary (~83 routes)
+
+ត្រួតពិនិត្យ:
+
+```bash
+php artisan route:list | grep "admin\." | wc -l
+```
+
+## ១៤.២ Models summary (75)
+
+ត្រួតពិនិត្យ:
+
+```bash
+ls app/Models/ | wc -l
+```
+
+## ១៤.៣ Translation keys summary
+
+```bash
+grep -c "=>" lang/en/coffee.php
+grep -c "=>" lang/kh/coffee.php
+grep -c ":" resources/js/lang/en.json
+grep -c ":" resources/js/lang/kh.json
+```
+
+ជាបច្ចុប្បន្ន **~300 keys** ឆ្លងកាត់ 4 ផ្ទាំង — ត្រូវរក្សា 4 ផ្ទាំងសម្បូរបាននិងស្មើ។
+
+## ១៤.៤ Pull Requests merged
+
+| PR | ប្រធានបទ |
+|---|---|
+| #1 | Pass 2 sub-modules (purchases, transfers, adjustments, waste, HR, recipes, notifications, online/delivery orders) |
+| #2 | Fix Vite bundling — load jQuery + DataTables from CDN |
+| #4 | Audit fixes — i18n sync, Yajra re-translation, 7 read-only system viewers |
+| #5 | Layout fix — custom admin SCSS (replace missing Skodash theme) |
+| #6 | Header dropdown polish (branch / locale / user) |
+| #7 | Sidebar collapse fix — slide offscreen on desktop |
+
+---
+
+> **ឯកសារយោងបន្ថែម (Additional References)**
+
+- Migration source-of-truth: `database/migrations/2026_05_13_000000_create_coffee_shop_pos_all_tables.php`
+- Audit report (PR #4): `AUDIT.md`
+- Testing skill: `.agents/skills/testing-coffee-shop-pos/SKILL.md`
+- GitHub repo: https://github.com/sounsonimaura-gif/coffee-shop-pos
+
+---
+
+*ឯកសារនេះត្រូវបាន update ដោយ Devin AI — ប្រសិនបើអ្នករកឃើញចំណុចអ្វីខុស សូម file issue នៅ GitHub។*
