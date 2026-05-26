@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, provide, ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from '@/composables/useI18n.js';
 import AdminHeader from '@/Layouts/Partials/AdminHeader.vue';
@@ -16,14 +16,48 @@ const props = defineProps({
 });
 
 const finalTitle = computed(() => props.title || props.pageTitle || t('dashboard'));
+
+// Sidebar toggle state — desktop "collapsed" and mobile "open" overlay
+const sidebarCollapsed = ref(false);
+const sidebarOpenMobile = ref(false);
+
+function toggleSidebar() {
+    if (window.matchMedia('(max-width: 991.98px)').matches) {
+        sidebarOpenMobile.value = !sidebarOpenMobile.value;
+    } else {
+        sidebarCollapsed.value = !sidebarCollapsed.value;
+    }
+}
+
+function closeMobileSidebar() {
+    sidebarOpenMobile.value = false;
+}
+
+provide('admin-layout', {
+    toggleSidebar,
+    sidebarCollapsed,
+    sidebarOpenMobile,
+});
 </script>
 
 <template>
-    <div class="wrapper">
+    <div
+        class="wrapper"
+        :class="{
+            'sidebar-collapsed': sidebarCollapsed,
+            'sidebar-open': sidebarOpenMobile,
+        }"
+    >
         <Head :title="finalTitle" />
 
         <AdminHeader />
         <AdminSidebar />
+
+        <div
+            v-if="sidebarOpenMobile"
+            class="sidebar-backdrop d-lg-none"
+            @click="closeMobileSidebar"
+        ></div>
 
         <main class="page-content">
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
@@ -58,9 +92,14 @@ const finalTitle = computed(() => props.title || props.pageTitle || t('dashboard
             <slot />
         </main>
 
-        <div class="overlay nav-toggle-icon"></div>
-        <a href="javascript:void(0);" class="back-to-top">
-            <i class="bx bxs-up-arrow-alt"></i>
-        </a>
     </div>
 </template>
+
+<style scoped>
+.sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1035;
+}
+</style>
