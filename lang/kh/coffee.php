@@ -247,6 +247,7 @@ return [
     'sign_in' => 'ចូល',
     'sign_in_subtitle' => 'ចូលគណនី Coffee POS របស់អ្នក',
     'size' => 'ទំហំ',
+    'sort_order' => 'លំដាប់តម្រៀប',
     'staff' => 'បុគ្គលិក',
     'staff_schedules' => 'កាលវិភាគបុគ្គលិក',
     'start_time' => 'ម៉ោងចាប់ផ្តើម',

@@ -247,6 +247,7 @@ return [
     'sign_in' => 'Sign in',
     'sign_in_subtitle' => 'Sign in to your Coffee POS account',
     'size' => 'Size',
+    'sort_order' => 'Sort Order',
     'staff' => 'Staff',
     'staff_schedules' => 'Staff Schedules',
     'start_time' => 'Start Time',
