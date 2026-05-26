@@ -1,6 +1,6 @@
 ---
 name: testing-coffee-shop-pos
-description: End-to-end test the Coffee Shop POS admin app (Laravel 12 + Vue 3 + Inertia + Yajra DataTables). Use when verifying CRUD modules, the StockService pipeline, payroll/recipe auto-calculations, or the KH/EN language switcher.
+description: End-to-end test the Coffee Shop POS admin app (Laravel 12 + Vue 3 + Inertia + Yajra DataTables). Use when verifying CRUD modules, the StockService pipeline, payroll/recipe auto-calculations, the KH/EN language switcher, or layout/sidebar behavior.
 ---
 
 # Testing the Coffee Shop POS
@@ -67,21 +67,50 @@ On an index page, click the top-right `EN ▾` toggle and select Khmer. Expect U
 **Known issues (NOT regressions — file as follow-ups if the user cares):**
 - **Yajra DataTable column headers do not re-translate** on hot switch — they read `column.title` once at DataTable init. Visible symptom: `Code`, `Grand Total`, `Status`, and raw keys like `coffee.date`, `coffee.supplier`, `coffee.payment_status` stay in English/raw in Khmer mode. Fix would be to destroy + re-init the DataTable when locale changes, or to translate column titles server-side per request.
 - **A few sidebar items render as raw keys** in both EN and KH because they're missing from `lang/en/coffee.php` and `lang/kh/coffee.php`: `hr`, `online_orders_module`, `recipes`, `staff_schedules`, `commissions`.
+- **Khmer glyph rendering**: the test VM may not have Khmer fonts installed. If glyphs look broken/stacked, install `fonts-noto` (e.g. `sudo apt-get install -y fonts-noto fonts-noto-color-emoji` or add to the env blueprint). The i18n strings themselves are correct in the DOM — only rendering is affected.
+
+## Sidebar / viewport testing
+
+The admin layout uses **two distinct paths** for the sidebar toggle, keyed off viewport width. When testing layout/header/sidebar changes, exercise BOTH paths:
+
+### Breakpoint and classes
+
+- **Desktop (≥992px)**: `toggleSidebar()` flips `sidebarCollapsed.value` → adds `.sidebar-collapsed` to `.wrapper`. Sidebar slides offscreen via `transform: translateX(-100%)`; `.top-header { left }` zeros; `.wrapper { padding-left }` zeros.
+- **Mobile (<992px = `@media (max-width: 991.98px)`)**: sidebar starts hidden. Toggle flips `sidebarOpenMobile.value` → adds `.sidebar-open` to `.wrapper`; sidebar slides in as an overlay with a backdrop. Backdrop click closes it.
+
+The Vue logic lives in `resources/js/Layouts/AdminLayout.vue`; the CSS lives in `resources/sass/admin-layout.scss`.
+
+### Simulating a mobile viewport in the test VM
+
+The GUI runs at 1024x768, which falls into the desktop breakpoint. To test the mobile branch, resize the Chrome window narrower than 992px:
+
+```bash
+# Switch Chrome to a ~700px-wide mobile-ish viewport
+DISPLAY=:0 wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz
+DISPLAY=:0 wmctrl -r :ACTIVE: -e 0,0,0,700,768   # gravity, x, y, width, height
+
+# Restore to maximized desktop
+DISPLAY=:0 wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz
+```
+
+After resizing, wait a beat and re-screenshot — the responsive layout uses CSS media queries (no JS resize-handler needed). Don't use Chrome DevTools device emulation for this; just resize the OS window. Resize back to maximized BEFORE recording the next desktop test so the rest of the recording looks consistent.
+
+### Common layout-regression triggers to watch for
+
+- A new CSS rule on `.sidebar-wrapper` that omits a `transform` baseline — the transition won't animate cleanly bidirectionally.
+- A new media query that overrides `.sidebar-wrapper { transform }` on mobile — makes the overlay flash.
+- A new wrapper class added in `AdminLayout.vue` that doesn't have a corresponding SCSS rule — makes the toggle look like it does nothing.
 
 ## Recording tips
 
 - Test purely via the UI — do not POST forms via `curl` to the admin endpoints, the auth/CSRF flow is session-cookie based and DataTable AJAX endpoints expect the Inertia request shape.
 - Always run the DB-verification `tinker` commands **after** each save — they're cheap and catch the exact failure mode ("row never persisted") that a green toast hides.
-- Maximize Chrome before starting the recording: `wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz`. The DataTable column controls are easier to read at full width.
+- **Maximize Chrome before starting the recording**: `sudo apt-get install -y wmctrl 2>/dev/null; DISPLAY=:0 wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz`. Doing this AFTER recording starts results in a recording that begins with a half-window.
 - Annotation style: one `test_start` per of the 4 tests above, then 1–2 consolidated `assertion`s per test (form-state + post-save state).
+- For sidebar/layout tests, capture a clear before/after pair: one screenshot with sidebar visible, one with sidebar collapsed/offscreen. Side-by-side comparison is the most readable evidence for layout PRs.
 
 ## Common gotchas
 
 - Tom Select inputs require clicking the wrapper first to open the dropdown, then clicking the option — typing into the input filters but doesn't always commit.
-- The `add_line` button on Purchase / Recipe forms inserts a row immediately above itself; the new row's qty defaults to 1 and cost to 0, so always set both before checking the total.
-- After saving, Yajra index rows are server-rendered — a hard refresh isn't needed but the DataTable may take a beat to re-fetch the JSON; wait ≈1s before screenshotting.
-- Numeric columns in the schema use `decimal(_,4)` so the index displays `540.0000`, `3.5000`, etc. — don't expect 2-decimal formatting unless the controller's column formatter trims it.
-
-## Devin Secrets Needed
-
-None — testing runs entirely against the local SQLite DB with seeded demo accounts. No external APIs.
+- The address bar at y=40 may not always accept clicks reliably via the computer tool; if a URL change appears to no-op, navigate by clicking a sidebar link instead (sidebar links emit Inertia visits which are equivalent).
+- The default screen is 1024x768. If a layout looks broken at this width, check whether it's the test viewport or a real CSS bug — try maximizing first.
