@@ -33,4 +33,19 @@ class StockAlert extends Model
         'is_resolved' => 'boolean',
         'resolved_at' => 'datetime',
     ];
+
+    public function ingredient()
+    {
+        return $this->belongsTo(Ingredient::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
 }

@@ -28,4 +28,14 @@ class LoyaltyPointTransaction extends Model
         'balance_after' => 'integer',
         'amount_value' => 'decimal:4',
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function saleInvoice()
+    {
+        return $this->belongsTo(SaleInvoice::class);
+    }
 }

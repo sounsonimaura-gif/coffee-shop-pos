@@ -1,10 +1,12 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n, setLocale } from '@/composables/useI18n.js';
 
 const page = usePage();
 const { t, locale } = useI18n();
+
+const layout = inject('admin-layout', null);
 
 const user = computed(() => page.props.auth?.user || null);
 const activeBranchId = computed(() => page.props.auth?.active_branch_id);
@@ -12,6 +14,20 @@ const branches = computed(() => user.value?.branches || []);
 const activeBranch = computed(() =>
     branches.value.find((b) => b.id === activeBranchId.value) || branches.value[0] || null
 );
+
+const userInitials = computed(() => {
+    const name = user.value?.name || 'U';
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p[0].toUpperCase())
+        .join('');
+});
+
+function toggleSidebar() {
+    if (layout?.toggleSidebar) layout.toggleSidebar();
+}
 
 function logout() {
     router.post(route('logout'));
@@ -33,35 +49,37 @@ function switchBranch(branchId) {
 <template>
     <header class="top-header">
         <nav class="navbar navbar-expand">
-            <div class="mobile-toggle-icon d-xl-none">
+            <div class="mobile-toggle-icon" @click="toggleSidebar" role="button" :aria-label="t('toggle_sidebar')">
                 <i class="bi bi-list"></i>
             </div>
-            <div class="top-navbar d-none d-xl-block">
+            <div class="top-navbar d-none d-md-block">
                 <ul class="navbar-nav align-items-center">
                     <li class="nav-item">
                         <Link class="nav-link" :href="route('admin.dashboard')">{{ t('dashboard') }}</Link>
                     </li>
-                    <li class="nav-item" v-if="activeBranch">
-                        <div class="dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-shop me-1"></i>
-                                {{ activeBranch.name }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="dropdown-header">{{ t('switch_branch') }}</li>
-                                <li v-for="b in branches" :key="b.id">
-                                    <button
-                                        class="dropdown-item"
-                                        :class="{ active: b.id === activeBranchId }"
-                                        type="button"
-                                        @click="switchBranch(b.id)"
-                                    >
-                                        {{ b.name }}
-                                        <small class="text-muted ms-2">{{ b.code }}</small>
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
+                    <li class="nav-item dropdown" v-if="activeBranch">
+                        <a
+                            class="nav-link dropdown-toggle dropdown-toggle-nocaret has-caret"
+                            href="#"
+                            data-bs-toggle="dropdown"
+                        >
+                            <i class="bi bi-shop"></i>
+                            <span class="fw-medium">{{ activeBranch.name }}</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header">{{ t('switch_branch') }}</li>
+                            <li v-for="b in branches" :key="b.id">
+                                <button
+                                    class="dropdown-item"
+                                    :class="{ active: b.id === activeBranchId }"
+                                    type="button"
+                                    @click="switchBranch(b.id)"
+                                >
+                                    {{ b.name }}
+                                    <small class="ms-2">{{ b.code }}</small>
+                                </button>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -77,9 +95,14 @@ function switchBranch(branchId) {
                 <ul class="navbar-nav align-items-center">
                     <!-- Language switcher (no full page reload) -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
+                        <a
+                            class="nav-link dropdown-toggle dropdown-toggle-nocaret has-caret"
+                            href="#"
+                            data-bs-toggle="dropdown"
+                            :aria-label="t('language')"
+                        >
                             <i class="bi bi-globe2"></i>
-                            <span class="ms-1 text-uppercase">{{ locale }}</span>
+                            <span class="text-uppercase fw-medium">{{ locale }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
@@ -97,25 +120,26 @@ function switchBranch(branchId) {
 
                     <!-- User dropdown -->
                     <li class="nav-item dropdown dropdown-large">
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
-                            <div class="user-setting d-flex align-items-center gap-1">
-                                <img src="/assets/backend/assets/images/avatars/avatar-1.png" class="user-img" alt="" onerror="this.style.display='none'" />
-                                <div class="user-name d-none d-sm-block">{{ user?.name || 'Guest' }}</div>
+                        <a
+                            class="nav-link dropdown-toggle dropdown-toggle-nocaret has-caret"
+                            href="#"
+                            data-bs-toggle="dropdown"
+                            :aria-label="user?.name || 'User menu'"
+                        >
+                            <div class="user-setting d-flex align-items-center gap-2">
+                                <span class="user-img">{{ userInitials }}</span>
+                                <span class="user-name d-none d-sm-block">{{ user?.name || 'Guest' }}</span>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <a class="dropdown-item" href="javascript:;">
-                                    <div class="d-flex align-items-center">
-                                        <div class="setting-icon">
-                                            <i class="bi bi-person-fill"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 dropdown-user-name">{{ user?.name }}</h6>
-                                            <small class="text-secondary">{{ user?.role?.name || t('user') }}</small>
-                                        </div>
+                                <div class="dropdown-user-card">
+                                    <span class="user-img">{{ userInitials }}</span>
+                                    <div>
+                                        <h6 class="dropdown-user-name">{{ user?.name }}</h6>
+                                        <small>{{ user?.role?.name || t('user') }}</small>
                                     </div>
-                                </a>
+                                </div>
                             </li>
                             <li><hr class="dropdown-divider" /></li>
                             <li>

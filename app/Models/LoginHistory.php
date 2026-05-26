@@ -24,4 +24,9 @@ class LoginHistory extends Model
         'is_success' => 'boolean',
         'logged_in_at' => 'datetime',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

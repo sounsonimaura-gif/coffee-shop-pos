@@ -21,11 +21,11 @@ class AuditLogsController extends Controller
             'titleKey' => 'coffee.audit_logs',
             'routes' => ['data' => 'admin.audit-logs.data'],
             'columns' => [
-                ['data' => 'created_at', 'name' => 'created_at', 'title' => __('coffee.from')],
-                ['data' => 'event', 'name' => 'event', 'title' => __('coffee.type')],
-                ['data' => 'auditable_type', 'name' => 'auditable_type', 'title' => __('coffee.module')],
-                ['data' => 'user_id', 'name' => 'user_id', 'title' => __('coffee.user')],
-                ['data' => 'ip_address', 'name' => 'ip_address', 'title' => __('coffee.code')],
+                ['data' => 'created_at', 'name' => 'created_at', 'title' => 'coffee.from'],
+                ['data' => 'event', 'name' => 'event', 'title' => 'coffee.type'],
+                ['data' => 'auditable_type', 'name' => 'auditable_type', 'title' => 'coffee.module'],
+                ['data' => 'user_id', 'name' => 'user_id', 'title' => 'coffee.user'],
+                ['data' => 'ip_address', 'name' => 'ip_address', 'title' => 'coffee.code'],
             ],
         ]);
     }

@@ -32,12 +32,12 @@ class OrdersController extends Controller
                 'create' => 'admin.pos.index', // create via POS
             ],
             'columns' => [
-                ['data' => 'order_no', 'title' => __('coffee.code'), 'name' => 'order_no'],
-                ['data' => 'order_type', 'title' => __('coffee.type'), 'name' => 'order_type'],
-                ['data' => 'grand_total', 'title' => __('coffee.total'), 'name' => 'grand_total'],
-                ['data' => 'payment_status', 'title' => __('coffee.status'), 'name' => 'payment_status'],
-                ['data' => 'status', 'title' => __('coffee.status'), 'name' => 'status'],
-                ['data' => 'created_at', 'title' => __('coffee.from'), 'name' => 'created_at'],
+                ['data' => 'order_no', 'title' => 'coffee.code', 'name' => 'order_no'],
+                ['data' => 'order_type', 'title' => 'coffee.type', 'name' => 'order_type'],
+                ['data' => 'grand_total', 'title' => 'coffee.total', 'name' => 'grand_total'],
+                ['data' => 'payment_status', 'title' => 'coffee.status', 'name' => 'payment_status'],
+                ['data' => 'status', 'title' => 'coffee.status', 'name' => 'status'],
+                ['data' => 'created_at', 'title' => 'coffee.from', 'name' => 'created_at'],
             ],
         ]);
     }

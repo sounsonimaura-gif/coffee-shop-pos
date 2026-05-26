@@ -23,11 +23,11 @@ class ReportsController extends Controller
             'titleKey' => 'coffee.sale_invoices',
             'routes' => ['data' => 'admin.reports.sales.data'],
             'columns' => [
-                ['data' => 'sale_no', 'name' => 'sale_no', 'title' => __('coffee.code')],
-                ['data' => 'sale_at', 'name' => 'sale_at', 'title' => __('coffee.from')],
-                ['data' => 'grand_total', 'name' => 'grand_total', 'title' => __('coffee.total')],
-                ['data' => 'paid_amount', 'name' => 'paid_amount', 'title' => __('coffee.paid')],
-                ['data' => 'status', 'name' => 'status', 'title' => __('coffee.status')],
+                ['data' => 'sale_no', 'name' => 'sale_no', 'title' => 'coffee.code'],
+                ['data' => 'sale_at', 'name' => 'sale_at', 'title' => 'coffee.from'],
+                ['data' => 'grand_total', 'name' => 'grand_total', 'title' => 'coffee.total'],
+                ['data' => 'paid_amount', 'name' => 'paid_amount', 'title' => 'coffee.paid'],
+                ['data' => 'status', 'name' => 'status', 'title' => 'coffee.status'],
             ],
         ]);
     }
@@ -52,10 +52,10 @@ class ReportsController extends Controller
             'titleKey' => 'coffee.stock',
             'routes' => ['data' => 'admin.reports.inventory.data'],
             'columns' => [
-                ['data' => 'created_at', 'name' => 'created_at', 'title' => __('coffee.from')],
-                ['data' => 'movement_type', 'name' => 'movement_type', 'title' => __('coffee.type')],
-                ['data' => 'ingredient_id', 'name' => 'ingredient_id', 'title' => __('coffee.ingredients')],
-                ['data' => 'quantity', 'name' => 'quantity', 'title' => __('coffee.quantity')],
+                ['data' => 'created_at', 'name' => 'created_at', 'title' => 'coffee.from'],
+                ['data' => 'movement_type', 'name' => 'movement_type', 'title' => 'coffee.type'],
+                ['data' => 'ingredient_id', 'name' => 'ingredient_id', 'title' => 'coffee.ingredients'],
+                ['data' => 'quantity', 'name' => 'quantity', 'title' => 'coffee.quantity'],
             ],
         ]);
     }
@@ -75,10 +75,10 @@ class ReportsController extends Controller
             'titleKey' => 'coffee.expenses',
             'routes' => ['data' => 'admin.reports.expenses.data'],
             'columns' => [
-                ['data' => 'expense_no', 'name' => 'expense_no', 'title' => __('coffee.code')],
-                ['data' => 'expense_date', 'name' => 'expense_date', 'title' => __('coffee.from')],
-                ['data' => 'amount', 'name' => 'amount', 'title' => __('coffee.price')],
-                ['data' => 'status', 'name' => 'status', 'title' => __('coffee.status')],
+                ['data' => 'expense_no', 'name' => 'expense_no', 'title' => 'coffee.code'],
+                ['data' => 'expense_date', 'name' => 'expense_date', 'title' => 'coffee.from'],
+                ['data' => 'amount', 'name' => 'amount', 'title' => 'coffee.price'],
+                ['data' => 'status', 'name' => 'status', 'title' => 'coffee.status'],
             ],
         ]);
     }

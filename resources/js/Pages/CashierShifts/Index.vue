@@ -22,7 +22,7 @@ function renderColumns() {
     return props.columns.map((c) => ({
         data: c.data,
         name: c.name,
-        title: c.title,
+        title: c.title && c.title.startsWith('coffee.') ? t(c.title.slice(7)) : t(c.title || ''),
         render: (d) => (d === null || d === undefined ? '' : String(d)),
     }));
 }
