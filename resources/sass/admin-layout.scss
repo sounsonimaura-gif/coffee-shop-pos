@@ -1,0 +1,551 @@
+/* ============================================================
+   Coffee Shop POS — Admin layout
+   A lightweight Bootstrap 5 based replacement for the legacy
+   Skodash theme. Styles only the classes used by AdminLayout.vue,
+   AdminSidebar.vue and AdminHeader.vue.
+   ============================================================ */
+
+:root {
+    --app-sidebar-width: 260px;
+    --app-sidebar-bg: #1f2937;
+    --app-sidebar-color: #e5e7eb;
+    --app-sidebar-muted: #9ca3af;
+    --app-sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+    --app-sidebar-active-bg: #0d6efd;
+    --app-sidebar-active-color: #ffffff;
+    --app-sidebar-border: rgba(255, 255, 255, 0.06);
+    --app-header-height: 64px;
+    --app-header-bg: #ffffff;
+    --app-header-border: #e5e7eb;
+    --app-body-bg: #f3f4f6;
+    --app-content-pad: 1.25rem;
+}
+
+html, body {
+    background: var(--app-body-bg);
+}
+
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ---------- wrapper ---------- */
+.wrapper {
+    min-height: 100vh;
+    padding-left: var(--app-sidebar-width);
+    transition: padding-left 0.2s ease;
+}
+
+.wrapper.sidebar-collapsed {
+    padding-left: 0;
+}
+
+.wrapper.sidebar-collapsed .sidebar-wrapper {
+    transform: translateX(-100%);
+}
+
+@media (max-width: 991.98px) {
+    .wrapper {
+        padding-left: 0;
+    }
+}
+
+/* ---------- sidebar ---------- */
+.sidebar-wrapper {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--app-sidebar-width);
+    background: var(--app-sidebar-bg);
+    color: var(--app-sidebar-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 1040;
+    transition: transform 0.2s ease;
+    overflow: hidden;
+    transform: translateX(0);
+}
+
+@media (max-width: 991.98px) {
+    .sidebar-wrapper {
+        transform: translateX(-100%);
+    }
+    .wrapper.sidebar-open .sidebar-wrapper {
+        transform: translateX(0);
+    }
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    height: var(--app-header-height);
+    border-bottom: 1px solid var(--app-sidebar-border);
+    flex: 0 0 auto;
+}
+
+.sidebar-header .logo-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.sidebar-header .logo-text {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-header .toggle-icon {
+    display: none;
+}
+
+/* Scrollable menu area */
+.sidebar-wrapper .metismenu {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.sidebar-wrapper .metismenu::-webkit-scrollbar { width: 6px; }
+.sidebar-wrapper .metismenu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+.sidebar-wrapper .metismenu::-webkit-scrollbar-track { background: transparent; }
+
+.sidebar-wrapper .metismenu li {
+    list-style: none;
+}
+
+.sidebar-wrapper .metismenu > li > a,
+.sidebar-wrapper .metismenu > li > .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    color: var(--app-sidebar-color);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    font-size: 0.92rem;
+    position: relative;
+}
+
+.sidebar-wrapper .metismenu > li > a:hover,
+.sidebar-wrapper .metismenu > li > .nav-link:hover {
+    background: var(--app-sidebar-hover-bg);
+    color: #ffffff;
+}
+
+.sidebar-wrapper .metismenu > li.mm-active > a,
+.sidebar-wrapper .metismenu > li > a.active {
+    background: var(--app-sidebar-hover-bg);
+    color: #ffffff;
+    border-left-color: var(--app-sidebar-active-bg);
+}
+
+.sidebar-wrapper .metismenu .parent-icon {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--app-sidebar-muted);
+}
+
+.sidebar-wrapper .metismenu > li.mm-active > a .parent-icon,
+.sidebar-wrapper .metismenu > li > a.active .parent-icon {
+    color: var(--app-sidebar-active-bg);
+}
+
+.sidebar-wrapper .metismenu .menu-title {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* arrow indicator for groups */
+.sidebar-wrapper .metismenu .has-arrow {
+    cursor: pointer;
+}
+
+.sidebar-wrapper .metismenu .has-arrow::after {
+    content: '';
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-style: solid;
+    border-width: 0 0 1px 1px;
+    border-color: currentColor;
+    transform: rotate(-45deg);
+    transition: transform 0.2s ease;
+    margin-left: 0.25rem;
+    opacity: 0.6;
+}
+
+.sidebar-wrapper .metismenu > li.mm-active > .has-arrow::after {
+    transform: rotate(135deg);
+    opacity: 1;
+}
+
+/* Submenu */
+.sidebar-wrapper .metismenu > li > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.18);
+    transition: max-height 0.25s ease;
+}
+
+.sidebar-wrapper .metismenu > li > ul.mm-show {
+    max-height: 800px;
+}
+
+.sidebar-wrapper .metismenu > li > ul > li > a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1rem 0.45rem 2.5rem;
+    color: rgba(229, 231, 235, 0.85);
+    text-decoration: none;
+    font-size: 0.86rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-wrapper .metismenu > li > ul > li > a:hover {
+    background: var(--app-sidebar-hover-bg);
+    color: #ffffff;
+}
+
+.sidebar-wrapper .metismenu > li > ul > li > a.active {
+    background: var(--app-sidebar-active-bg);
+    color: #ffffff;
+}
+
+.sidebar-wrapper .metismenu > li > ul > li > a i {
+    font-size: 0.7rem;
+    opacity: 0.6;
+}
+
+/* ---------- header ---------- */
+.top-header {
+    position: fixed;
+    top: 0;
+    left: var(--app-sidebar-width);
+    right: 0;
+    height: var(--app-header-height);
+    background: var(--app-header-bg);
+    border-bottom: 1px solid var(--app-header-border);
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    transition: left 0.2s ease;
+}
+
+.wrapper.sidebar-collapsed .top-header {
+    left: 0;
+}
+
+@media (max-width: 991.98px) {
+    .top-header {
+        left: 0;
+    }
+}
+
+.top-header .navbar {
+    width: 100%;
+    padding: 0 1rem;
+    flex-wrap: nowrap;
+}
+
+.top-header .mobile-toggle-icon {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #374151;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.15s ease;
+}
+
+.top-header .mobile-toggle-icon:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.top-header .navbar-nav .nav-link {
+    color: #374151;
+    padding: 0.5rem 0.75rem;
+}
+
+.top-header .navbar-nav .nav-link:hover {
+    color: #0d6efd;
+}
+
+.top-header .searchbar {
+    position: relative;
+    max-width: 360px;
+    width: 100%;
+}
+
+.top-header .searchbar .search-icon {
+    left: 0;
+    color: #6b7280;
+    pointer-events: none;
+}
+
+.top-header .searchbar .form-control {
+    padding-left: 2.25rem;
+    background: #f3f4f6;
+    border-color: transparent;
+}
+
+.top-header .searchbar .form-control:focus {
+    background: #ffffff;
+    border-color: #0d6efd;
+}
+
+.top-header .user-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #0d6efd;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.top-header .user-name {
+    font-size: 0.9rem;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.top-header .user-role {
+    font-size: 0.72rem;
+    color: #6b7280;
+    line-height: 1.1;
+}
+
+/* ---------- header dropdowns ---------- */
+.top-header .navbar-nav > .nav-item.dropdown > .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.top-header .navbar-nav > .nav-item.dropdown > .nav-link:hover,
+.top-header .navbar-nav > .nav-item.dropdown.show > .nav-link {
+    background: rgba(13, 110, 253, 0.08);
+    color: #0d6efd;
+}
+
+/* Hide Bootstrap's default caret on the opt-out class */
+.top-header .dropdown-toggle-nocaret::after,
+.top-header .dropdown-toggle-nocaret::before {
+    display: none !important;
+}
+
+/* Our own chevron — small, muted, vertically centered */
+.top-header .nav-link.has-caret::after {
+    content: '';
+    width: 0.45rem;
+    height: 0.45rem;
+    border-style: solid;
+    border-width: 0 1.5px 1.5px 0;
+    border-color: currentColor;
+    transform: rotate(45deg) translateY(-2px);
+    opacity: 0.55;
+    margin-left: 0.15rem;
+    transition: transform 0.2s ease;
+}
+
+.top-header .nav-item.dropdown.show > .nav-link.has-caret::after {
+    transform: rotate(-135deg) translateY(0);
+    opacity: 0.85;
+}
+
+/* Dropdown menu polish */
+.top-header .dropdown-menu {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.65rem;
+    box-shadow: 0 12px 28px rgba(17, 24, 39, 0.12);
+    padding: 0.4rem;
+    margin-top: 0.55rem !important;
+    min-width: 12rem;
+    animation: header-dropdown-in 0.12s ease-out;
+}
+
+@keyframes header-dropdown-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.top-header .dropdown-menu .dropdown-item {
+    border-radius: 0.4rem;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.88rem;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.top-header .dropdown-menu .dropdown-item:hover,
+.top-header .dropdown-menu .dropdown-item:focus {
+    background: rgba(13, 110, 253, 0.08);
+    color: #0d6efd;
+}
+
+.top-header .dropdown-menu .dropdown-item.active {
+    background: #0d6efd;
+    color: #ffffff;
+}
+
+.top-header .dropdown-menu .dropdown-header {
+    color: #6b7280;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.4rem 0.6rem 0.2rem;
+}
+
+.top-header .dropdown-menu .dropdown-divider {
+    margin: 0.35rem -0.4rem;
+    border-top-color: #e5e7eb;
+}
+
+/* User dropdown header card */
+.top-header .dropdown-menu .dropdown-user-card {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 0.6rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(180deg, rgba(13, 110, 253, 0.06), rgba(13, 110, 253, 0));
+}
+
+.top-header .dropdown-menu .dropdown-user-card .user-img {
+    width: 38px;
+    height: 38px;
+    font-size: 0.9rem;
+}
+
+.top-header .dropdown-menu .dropdown-user-card .dropdown-user-name {
+    font-size: 0.92rem;
+    color: #111827;
+    margin: 0;
+    font-weight: 600;
+}
+
+.top-header .dropdown-menu .dropdown-user-card small {
+    color: #6b7280;
+}
+
+/* Branch switcher dropdown caret active subitem */
+.top-header .dropdown-menu li button.dropdown-item small {
+    color: #9ca3af;
+    margin-left: auto;
+}
+
+.top-header .dropdown-menu li button.dropdown-item.active small {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Make the user trigger look like a pill on hover */
+.top-header .nav-item.dropdown-large > .nav-link {
+    padding: 0.25rem 0.5rem 0.25rem 0.35rem;
+}
+
+/* ---------- main content ---------- */
+main.page-content {
+    padding: calc(var(--app-header-height) + var(--app-content-pad)) var(--app-content-pad) var(--app-content-pad);
+    min-height: calc(100vh - 0px);
+}
+
+.page-breadcrumb {
+    background: transparent;
+    margin-bottom: 1rem;
+}
+
+.page-breadcrumb .breadcrumb-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #111827;
+    border-right: 1px solid #d1d5db;
+}
+
+.page-breadcrumb .breadcrumb {
+    background: transparent;
+}
+
+.page-breadcrumb .breadcrumb .breadcrumb-item a {
+    color: #6b7280;
+    text-decoration: none;
+}
+
+.page-breadcrumb .breadcrumb .breadcrumb-item.active {
+    color: #111827;
+}
+
+/* ---------- helpers ---------- */
+.back-to-top {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #0d6efd;
+    color: #ffffff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    z-index: 1020;
+}
+
+.back-to-top.show {
+    display: inline-flex;
+}
+
+/* Card defaults — most pages render their tables inside .card */
+.card {
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.card-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+}
+
+/* ---------- DataTable layout fixes ---------- */
+.dt-wrapper table.dataTable {
+    width: 100% !important;
+}
+
+.dt-wrapper .dataTables_wrapper > .row {
+    margin-bottom: 0.5rem;
+}
+
+/* Make sure tables don't overflow the card */
+.card-body {
+    overflow-x: auto;
+}

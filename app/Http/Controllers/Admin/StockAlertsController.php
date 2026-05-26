@@ -27,7 +27,7 @@ class StockAlertsController extends BaseReadOnlyController
             ['data' => 'alert_type', 'title' => 'coffee.type'],
             ['data' => 'ingredient_name', 'name' => 'ingredient.name', 'title' => 'coffee.ingredient'],
             ['data' => 'current_quantity', 'title' => 'coffee.current_quantity'],
-            ['data' => 'expiry_date', 'title' => 'coffee.date'],
+            ['data' => 'expiry_date', 'title' => 'coffee.expiry_date'],
             ['data' => 'is_resolved', 'title' => 'coffee.acknowledged'],
             ['data' => 'actions', 'title' => 'coffee.actions', 'orderable' => false, 'searchable' => false],
         ];

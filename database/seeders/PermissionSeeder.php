@@ -77,9 +77,12 @@ class PermissionSeeder extends Seeder
         'notification_templates' => ['view', 'create', 'update', 'delete'],
 
         'reports' => ['sales', 'inventory', 'expenses', 'profit'],
+        'report_exports' => ['view'],
         'audit_logs' => ['view'],
         'login_histories' => ['view'],
         'database_backups' => ['view', 'create', 'delete'],
+        'notifications' => ['view'],
+        'loyalty_point_transactions' => ['view'],
     ];
 
     public function run(): void
